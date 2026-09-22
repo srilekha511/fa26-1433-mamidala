@@ -5,3 +5,5 @@ Repository: fa26-1433-mamidala
 I can inspect a change before I commit it.
 
 I can remove a change from the staging area without deleting the change.
+
+I can develop a change on a separate branch and merge it into main.
