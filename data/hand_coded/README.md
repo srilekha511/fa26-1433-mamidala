@@ -16,7 +16,7 @@ AI-assisted*. Built from `data/derived/ai_flairs_draft.csv`:
 
 ## reddit_rule_dates.csv
 
-Columns: `subreddit,label_start,mandatory_start,label_source,mandatory_source,notes`.
+Columns: `subreddit,label_start,mandatory_start,label_source,mandatory_source,mandatory_start_loose,notes`.
 One row per subreddit in `ai_flairs.csv`. Dates are `YYYY-MM-DD` in UTC.
 
 **label_start**: the first date posters could label a post as AI. Take the *earliest* of:
@@ -35,5 +35,9 @@ When a snapshot is the evidence, date the change to the snapshot's date, because
 happened between it and the previous snapshot. Write the gap in `notes`, e.g.
 "changed between 2023-03-02 and 2023-04-11 snapshots". A moderator announcement gives an exact
 date and takes priority.
+
+**mandatory_start_loose**: a looser reading for robustness. Also counts a plain instruction in the
+subreddit's rules list ("Tag AI posts using the flair", "select the AI Generated flair") with no
+"must" or removal wording. Equal to `mandatory_start` when the strict wording is present.
 
 **label_source / mandatory_source**: the snapshot URL or announcement permalink the date came from.
