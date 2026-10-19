@@ -20,13 +20,19 @@ RAW = ROOT / "data" / "raw" / "arctic"
 DERIVED = ROOT / "data" / "derived"
 ENDPOINT = {"posts": "posts/search", "comments": "comments/search"}
 SECONDS_PER_PAGE = 9  # measured on a large subreddit, including rate-limit retries
-AFTER, BEFORE = f"{FIRST_MONTH}-01", f"{int(LAST_MONTH[:4]) + 1}-01-01"
 
 
-def monthly_counts(endpoint, sub):
-    """The API's own item count for each month (date strings: epoch seconds return zeros)."""
-    data = arctic.get(endpoint + "/aggregate", {"aggregate": "created_utc", "frequency": "month",
-                                                "subreddit": sub, "after": AFTER, "before": BEFORE})
+def monthly_counts(endpoint, sub, get=None):
+    """The API's own item count for each month (date strings: epoch seconds return zeros).
+
+    Asks one year at a time: a four-year aggregate over a busy subreddit times out (HTTP 422).
+    """
+    get = get or arctic.get
+    data = []
+    for year in range(int(FIRST_MONTH[:4]), int(LAST_MONTH[:4]) + 1):
+        data += get(endpoint + "/aggregate", {"aggregate": "created_utc", "frequency": "month",
+                                              "subreddit": sub, "after": f"{year}-01-01",
+                                              "before": f"{year + 1}-01-01"})
     out = {}
     for row in data:
         # Buckets are labelled at local midnight (e.g. 2023-12-31T23:00Z for January 2024),
