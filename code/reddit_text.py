@@ -89,3 +89,23 @@ def retrieval_regime(post):
 def removal_type(post):
     """Who removed the post, if anyone, from either Reddit's field or Arctic Shift's _meta."""
     return post.get("removed_by_category") or (post.get("_meta") or {}).get("removal_type")
+
+
+VIDEO_DOMAINS = {"v.redd.it", "youtube.com", "www.youtube.com", "youtu.be", "m.youtube.com"}
+IMAGE_DOMAINS = {"i.redd.it", "i.imgur.com", "imgur.com"}
+IMAGE_EXTENSIONS = (".jpg", ".jpeg", ".png", ".gif", ".webp")
+
+
+def post_type(post):
+    """What a post shows: text, image, gallery, video or an outside link."""
+    if post.get("is_self"):
+        return "text"
+    if post.get("is_gallery"):
+        return "gallery"
+    hint, domain = post.get("post_hint") or "", post.get("domain") or ""
+    if post.get("is_video") or hint.endswith(":video") or domain in VIDEO_DOMAINS:
+        return "video"
+    url = (post.get("url") or "").lower()
+    if hint == "image" or domain in IMAGE_DOMAINS or url.endswith(IMAGE_EXTENSIONS):
+        return "image"
+    return "link"

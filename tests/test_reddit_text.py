@@ -81,3 +81,21 @@ def test_removal_type_counts_meta_removals():
 
 def test_period_without_label_date_is_pre():
     assert reddit_text.period(ts("2025-06-01T00:00:00"), "", "") == "pre"
+
+
+@pytest.mark.parametrize("fields, expected", [
+    ({"is_self": True}, "text"),
+    ({"is_gallery": True}, "gallery"),
+    ({"is_video": True, "domain": "v.redd.it"}, "video"),
+    ({"post_hint": "rich:video", "domain": "youtu.be"}, "video"),
+    ({"domain": "youtube.com"}, "video"),
+    ({"post_hint": "image", "domain": "i.redd.it"}, "image"),
+    ({"domain": "i.imgur.com"}, "image"),
+    ({"domain": "example.com", "url": "https://example.com/art.PNG"}, "image"),
+    ({"domain": "example.com", "url": "https://example.com/story"}, "link"),
+    ({}, "link"),
+])
+def test_post_type(fields, expected):
+    base = {"is_self": False, "is_video": False, "is_gallery": None, "post_hint": None,
+            "domain": "", "url": ""}
+    assert reddit_text.post_type({**base, **fields}) == expected
