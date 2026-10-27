@@ -1,0 +1,173 @@
+# Analysis sample and control subreddits (Reddit)
+
+
+This memo defines the Reddit analysis sample, says why each outcome is measured, and gives a fixed
+rule for choosing control subreddits. It covers Reddit only; Substack and arXiv wait until there are
+baseline results here.
+
+## 1. Treated units: subreddits that switched from voluntary to mandatory labels
+
+I read every moderator post that mentions AI in the 13 study subreddits (all posts, 2022-2025, from
+Arctic Shift) and each subreddit's full rules text in July 2023 and November 2024 (from the AIRules
+dataset, Lloyd et al. 2025). The old.reddit sidebar snapshots I used before often lag the rules by
+months, so several dates moved. Each subreddit falls into one group (`data/hand_coded/reddit_rule_dates.csv`):
+
+| Group | Subreddits | Role |
+|---|---|---|
+| Switcher: voluntary, then mandatory | wallpaper (2024-11-22), Shrek (2023-10-17), NikkeMobile (2024-04-13), Frozen (2024-01-05) | Treated |
+| Mandatory when the label was introduced | HybridAnimals, overlord, sticker, GloriousTomBombadil, FantasyMaps | Excluded: never voluntary |
+| Voluntary throughout 2022-2025 | animearmor | Comparison for the labeled share |
+| Requirement date unknown | TheEminenceInShadow, redrising, MobileWallpaper | Excluded |
+
+There are four treated units, not the five I reported on 19 October. overlord made its flair
+mandatory on the day it created it (2023-01-13). Wallpaper, NikkeMobile and Frozen gained mandates
+I had missed. Each switcher has a caveat:
+
+- **wallpaper**: the cleanest case. The flair was announced as "not required" in 2022; the 2024 post
+  says AI content "MUST be tagged", but enforcement is an honor system.
+- **Shrek**: no confound in the rules, but see the capture-timing problem in section 6.
+- **NikkeMobile**: the same post capped AI posts at two per day for the whole community.
+- **Frozen**: the same post banned images from DALL-E, Midjourney and Stable Diffusion, and since at
+  least July 2023 the rules already required naming the AI app in the title. Only the flair switched.
+
+## 2. Outcomes and why each is measured
+
+The three possible answers on the creator side are: the mandate raises labeling (A1, so voluntary
+labeling was incomplete), it changes nothing (A2), or AI posting falls instead (A3). The flaired
+share alone cannot tell A1 from A3, since more labeling and fewer AI posts both move it. So:
+
+1. **Flaired share of all posts**, from flair alone, with no detector. This is what creators visibly
+   do. It is the baseline outcome.
+2. **Log posts per month.** This shows whether posters leave altogether when the label becomes
+   mandatory (your comment on the outline). It needs no flair, so it can use control subreddits
+   from all of Reddit (section 3).
+3. **AI share of all posts**, from Pangram's image detector on a random sample stratified by
+   subreddit, period and capture regime. Only this separates A1 from A3: the labeled share *among AI
+   posts* is outcome 1 divided by outcome 3, and neither is conditioned on detection. It is needed
+   only if outcome 1 moves at the switch, which is why it comes after the baseline. Pangram's cost
+   per image will set the sample size.
+
+No sample is restricted to detector-flagged posts, since the AI share responds to the mandate.
+
+## 3. Controls
+
+The two outcomes need different controls.
+
+**Flaired share.** A control must have an AI flair, or the outcome is undefined. Only animearmor kept
+the flair voluntary throughout, so the comparison is mainly between switchers: those that have not
+switched yet serve as controls for those that have (switch dates run from 2023-10 to 2024-11).
+Subreddits that were mandatory from the start are always treated, so they cannot serve as controls.
+
+**Posts per month.** A control needs no flair, so I choose controls from the whole AIRules population
+with a rule fixed before looking at any outcome (`code/select_controls.py`):
+
+1. Population: the English-language subreddits AIRules saw in both July 2023 and November 2024
+   with non-empty rules (71,862).
+2. Drop any subreddit with an AI rule in either snapshot, by the AIRules label or by AI words in its
+   rules text (2,986 dropped).
+3. Keep Content Generation communities in the switcher's own AIRules topic (wallpaper: Art; Shrek:
+   Humor; NikkeMobile: Video Games; Frozen: Entertainment).
+4. Shortlist the 15 nearest each switcher in July 2023 subscribers.
+5. Drop shortlisted subreddits that are mostly NSFW, have a month with no posts in the 12 months
+   before the switcher's mandate, or show an AI flair in a June 2025 sample (catching AI rules
+   adopted after November 2024).
+6. Match three controls per switcher on the 12 months before its mandate: mean log posts per month,
+   the trend in log posts, and the image share of a 100-post sample. Nearest first, without
+   replacement.
+7. Replace any match whose 2022-2025 counts cannot be fetched or that has a month with no posts.
+
+Why these variables: parallel trends in posting volume is more plausible for communities that face
+the same supply of AI images (same topic, image-sharing communities), that are of a similar size
+(similar moderation capacity), and that were on a similar path just before the switch.
+
+Of the 60 shortlisted subreddits, one was dropped (a month with no posts) and no match needed
+replacing. The matches (`data/derived/control_matches.csv`):
+
+| Switcher | Matched controls | Distance |
+|---|---|---|
+| wallpaper | ArchitecturePorn, Graffiti, DesignPorn | 0.20-0.65 |
+| Shrek | linguisticshumor, TheLetterH, NolanBatmanMemes | 0.44-1.26 |
+| Frozen | Bluray, 90scartoons, Ghost_in_the_Shell | 0.71-0.88 |
+| NikkeMobile | thelongdark, psx, wii | 1.56-1.75 |
+
+NikkeMobile's matches are the weakest: it posts about 4,000 times a month, more than any Video Games
+subreddit of its subscriber count, so its controls post about seven times less (the gap in levels
+differences out, but the comparison is looser).
+
+**More voluntary-label subreddits.** One voluntary subreddit is too few for the flaired share (see
+section 5). The full AIRules data lists 76 more Content Generation subreddits whose rules mention
+labeling AI posts: 40 with voluntary wording, 25 whose rules became mandatory between the two
+snapshots, and 11 that moved from labeling to a ban. A scan of their post flairs is running
+(`code/find_label_rule_subreddits.py`, then `code/find_ai_flair_subreddits.py`); those with an AI
+flair will be dated from moderator posts the same way as the current 13.
+
+## 4. Specification
+
+One specification: a stacked event study in months relative to each switcher's mandate. Each stack
+holds one switcher and its controls, so a switcher is never compared with an already-treated unit.
+The figures show 12 months either side. The estimate is the change in the switcher-minus-control gap
+from the six months before the mandate to the six months after, which on a balanced window equals
+the coefficient from a stack regression with subreddit and month fixed effects. The average across
+switchers is a summary, not a separate result (your comment on 4.1 and 4.2).
+
+For the flaired share, a stack's controls are animearmor plus switchers whose mandate comes after the
+stack's 12-month post window. For posts per month, they are the three matched controls.
+
+With four treated units, clustered standard errors are not reliable. Following Roth et al. (2023,
+section 5.1), I report each switcher's estimate separately, with a placebo p-value: the same estimate
+at every earlier date whose whole window falls before the mandate (and, for the flaired share, after
+the label existed). The wild cluster bootstrap is a later check.
+
+## 5. Baseline results
+
+Code: `code/analyze_reddit_did.py`. Figures: `output/flair_event_study.png`,
+`output/posts_event_study.png`. Six months either side of the mandate:
+
+| Switcher | Flaired share, before → after | Flaired share DiD (placebo p) | Posts per month DiD (placebo p) |
+|---|---|---|---|
+| Shrek (2023-10) | 1.2% → 6.2% | −1.5 pp (1.00, 1 date) | +4% (0.91) |
+| Frozen (2024-01) | 9.9% → 3.0% | +16.6 pp (0.25, 3 dates) | −19% (0.14) |
+| NikkeMobile (2024-04) | 0.7% → 0.6% | +14.3 pp (0.60, 4 dates) | +5% (0.94) |
+| wallpaper (2024-11) | 11.5% → 19.8% | −7.2 pp (0.53, 14 dates) | +13% (0.25) |
+
+What this shows so far:
+
+- **The switchers' own flaired shares move as the theory allows, in different directions.**
+  wallpaper steps up at the mandate on top of a rising trend, and Shrek jumps from 0.4% to 10.7% in
+  the mandate month (A1: labeling was incomplete). Frozen's share falls about two months before its
+  mandate, as its AI-model ban would predict (A3: AI posting leaves). NikkeMobile, where AI posts
+  were already capped, does not move (A2).
+- **The flaired-share DiD is not informative yet.** animearmor posts about 17 times a month, so its
+  flaired share swings between 0% and 50% and drives every estimate. Frozen's +16.6 pp, for example,
+  is almost all animearmor falling from 44% to 0%. More voluntary subreddits (section 3) are the fix.
+- **No switcher shows a clear change in posting volume.** No placebo p-value is below 0.14. Frozen's
+  −19% is the largest and fits its ban.
+
+These are baseline estimates on four units and are not yet results.
+
+
+## 6. What this drops, and remaining risks
+
+Dropped from the outline:
+- The 2SLS label effect (reader β divided by creator β). Its exclusion restriction fails if the
+  mandate changes which posts get made, which outcome 2 tests directly.
+- The separate pooled specification and the post-level hard-to-spot regression.
+
+Risks:
+- **Capture timing.** Arctic Shift captured posts weeks late before mid-2023 and within seconds
+  afterwards, so flair added after posting is seen in the early regime but not the late one. In the
+  12 months before the mandate, the share of posts captured live is 100% for wallpaper, 75% for
+  NikkeMobile, 50% for Frozen and 25% for Shrek. After the mandate it is about 100% for all four.
+  Shrek's before-after comparison is therefore partly a comparison of capture regimes; wallpaper's
+  is not.
+- **Four treated units**, three with a rule change bundled into the mandate.
+- **Control rules after 2025-06** are not checked; the AIRules labels are model-assigned.
+
+## 7. Decisions for you
+
+1. Is the stacked event study, with placebo-date inference, the right single specification?
+2. Should Frozen and NikkeMobile stay in the main sample, given their bundled rule changes, or move
+   to robustness, leaving wallpaper and Shrek as the main sample?
+3. If the flair scan adds few switchers, is a two-to-four-switcher sample acceptable given Roth et
+   al. (2023), or should I widen treatment to the introduction of the label (13 subreddits, posts per
+   month only) or to the AI bans the scan finds?

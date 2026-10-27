@@ -33,6 +33,11 @@ def monthly_counts(endpoint, sub, get=None):
         data += get(endpoint + "/aggregate", {"aggregate": "created_utc", "frequency": "month",
                                               "subreddit": sub, "after": f"{year}-01-01",
                                               "before": f"{year + 1}-01-01"})
+    return month_buckets(data)
+
+
+def month_buckets(data):
+    """Month -> count from the aggregate endpoint's rows."""
     out = {}
     for row in data:
         # Buckets are labelled at local midnight (e.g. 2023-12-31T23:00Z for January 2024),

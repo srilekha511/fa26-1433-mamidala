@@ -15,6 +15,12 @@ Reddit sample, in order. Steps marked *by hand* edit files in `data/hand_coded/`
 5. `python3 code/list_mod_ai_posts.py`, then *by hand*: code `reddit_rule_dates.csv`
 6. `python3 code/check_rule_dates.py`
 7. `python3 code/build_reddit_posts.py`
+8. Download the AIRules longitudinal and rules sets (github.com/sTechLab/AIRules, Git LFS) into `data/raw/airules/`,
+   then `python3 code/select_controls.py` (matched control subreddits for posts per month)
+9. `python3 code/analyze_reddit_did.py` (baseline event studies, figures in `output/`)
+
+Search for more study subreddits: `python3 code/find_label_rule_subreddits.py`, then
+`python3 code/find_ai_flair_subreddits.py data/derived/airules_label_candidates.csv voluntary,switcher,ban`.
 
 Earlier exploratory scripts: `code/fetch_flair_counts.py`, then `code/plot_wallpaper_flair.py`.
 
