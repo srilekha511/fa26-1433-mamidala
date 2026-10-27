@@ -87,7 +87,9 @@ def main():
         sys.exit("no usable posts found; run code/fetch_reddit_dumps.py posts first")
     df = pd.DataFrame(rows)
     df.to_parquet(DERIVED / "reddit_posts.parquet", index=False)
-    subreddit_months(df).to_csv(DERIVED / "reddit_subreddit_months.csv", index=False)
+    panel = subreddit_months(df)
+    panel.insert(1, "group", panel["subreddit"].map({s: r["group"] for s, r in rules.items()}))
+    panel.to_csv(DERIVED / "reddit_subreddit_months.csv", index=False)
     pd.DataFrame([{"subreddit": s, "period": per, "regime": reg, "text_status": st, "n": n}
                   for (s, per, reg, st), n in sorted(filtered.items())]).to_csv(
         DERIVED / "reddit_post_filter_counts.csv", index=False)

@@ -1,7 +1,7 @@
 from check_rule_dates import problems
 from list_mod_ai_posts import is_mod_ai_post
 
-GOOD = {"subreddit": "a", "label_start": "2023-02-01", "mandatory_start": "2024-01-15",
+GOOD = {"subreddit": "a", "group": "switcher", "label_start": "2023-02-01", "mandatory_start": "2024-01-15",
         "label_source": "https://web.archive.org/web/x", "mandatory_source": "https://web.archive.org/web/y",
         "notes": ""}
 
@@ -11,7 +11,13 @@ def test_good_file_has_no_problems():
 
 
 def test_never_mandatory_is_allowed():
-    assert problems([{**GOOD, "mandatory_start": "", "mandatory_source": ""}], ["a"]) == []
+    assert problems([{**GOOD, "group": "voluntary_throughout", "mandatory_start": "", "mandatory_source": ""}],
+                    ["a"]) == []
+
+
+def test_catches_bad_group():
+    assert any("group" in p for p in problems([{**GOOD, "group": "ban"}], ["a"]))
+    assert any("switcher needs" in p for p in problems([{**GOOD, "mandatory_start": "", "mandatory_source": ""}], ["a"]))
 
 
 def test_catches_each_error():

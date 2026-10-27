@@ -10,6 +10,7 @@ from datetime import date
 from reddit_subreddits import ROOT, study_subreddits
 
 RULE_DATES = ROOT / "data" / "hand_coded" / "reddit_rule_dates.csv"
+GROUPS = {"switcher", "mandatory_at_intro", "voluntary_throughout", "unclear"}
 
 
 def _parse(value):
@@ -27,6 +28,10 @@ def problems(rows, study):
         seen.add(sub)
         if sub not in study:
             out.append(f"{sub}: not a study subreddit (not in ai_flairs.csv)")
+        if r.get("group") not in GROUPS:
+            out.append(f"{sub}: group {r.get('group')!r} is not one of {sorted(GROUPS)}")
+        if r.get("group") == "switcher" and not r["mandatory_start"]:
+            out.append(f"{sub}: a switcher needs a mandatory_start")
         label = _parse(r["label_start"])
         if label is None:
             out.append(f"{sub}: label_start {r['label_start']!r} is not YYYY-MM-DD")
