@@ -2,6 +2,7 @@
 
 import gzip
 import json
+import re
 import time
 import urllib.parse
 import urllib.request
@@ -14,13 +15,18 @@ CDX = "https://web.archive.org/cdx/search/cdx"
 HEADERS = {"User-Agent": "fa26-1433 research project"}
 
 # old.reddit's front page shows the sidebar, which most subreddits use for rules; the wiki and
-# about/rules pages are archived less often but are checked too.
+# about/rules pages are archived less often but are checked too. Some subreddits keep their rules only
+# in new Reddit's rules widget, which the www.reddit.com front page renders (not on every capture).
 PAGES = {
     "sidebar": "old.reddit.com/r/{sub}/",
     "wiki_rules": "www.reddit.com/r/{sub}/wiki/rules",
     "about_rules": "old.reddit.com/r/{sub}/about/rules",
+    "www_front": "www.reddit.com/r/{sub}/",
 }
-SELECTORS = ["div.side div.md", "div.wiki-page-content div.md", "div.subreddit-rules-page"]
+SELECTORS = ["div.side div.md", "div.wiki-page-content div.md", "div.subreddit-rules-page",
+             'aside[aria-label="Community information"]',  # 2024- new Reddit right rail, all rules
+             'faceplate-tracker[source="rules_widget"]']  # one per rule with a description, when outside it
+RULES_HEADING = re.compile(r"^r/\w+ Rules$")  # heads the rules widget in the 2023 new Reddit layout
 
 
 def decode_body(raw):
@@ -67,8 +73,21 @@ def snapshot_url(timestamp, original):
 
 def extract_rule_text(html):
     soup = BeautifulSoup(html, "html.parser")
-    parts = [el.get_text("\n", strip=True) for sel in SELECTORS for el in soup.select(sel)]
+    found = [el for sel in SELECTORS for el in soup.select(sel)]
+    ids = {id(el) for el in found}
+    # A rule inside an already selected block (a widget inside the right rail) would be counted twice.
+    parts = [el.get_text("\n", strip=True) for el in found if not any(id(a) in ids for a in el.parents)]
+    parts += [rules_widget(h) for h in soup.find_all(string=RULES_HEADING)]
     return "\n".join(p for p in parts if p)
+
+
+def rules_widget(heading):
+    """Text of the smallest block around an "r/<sub> Rules" heading that also holds the rules."""
+    for el in heading.parents:
+        text = el.get_text("\n", strip=True)
+        if text.count("\n") >= 2:
+            return text
+    return ""
 
 
 def ai_snippets(text):

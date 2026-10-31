@@ -38,3 +38,9 @@ def test_mod_ai_post():
     assert is_mod_ai_post({"stickied": True, "title": "Announcement", "selftext": "ChatGPT posts need a flair"})
     assert not is_mod_ai_post({"distinguished": None, "title": "AI story", "selftext": ""})
     assert not is_mod_ai_post({"distinguished": "moderator", "title": "Weekly thread", "selftext": ""})
+
+
+def test_ban_start_is_checked():
+    assert problems([{**GOOD, "ban_start": "2025-01-01"}], ["a"]) == []
+    assert any("ban_start" in p for p in problems([{**GOOD, "ban_start": "2025/01"}], ["a"]))
+    assert any("ban_start is before" in p for p in problems([{**GOOD, "ban_start": "2022-01-01"}], ["a"]))

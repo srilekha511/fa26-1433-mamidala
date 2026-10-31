@@ -12,11 +12,14 @@ AI-assisted*. Built from `data/derived/ai_flairs_draft.csv`:
 - Copy `flair_text` exactly, including emoji codes and capitalization.
 - Keep a subreddit only if its approved flairs appear on at least 20 sampled posts in total
   (column `n` of the draft). Fewer than that is too few labeled posts to study.
+  For the AIRules expansion (`code/build_expansion_review.py`), the 20 applies to the estimated total
+  of flaired posts, scaled up from each month's sample, and the subreddit also needs a median of at
+  least 30 posts a month since 2023 and a flair that appears by 2025-06.
 - Use `notes` for anything unusual, e.g. "flair also used for AI news before 2023-05".
 
 ## reddit_rule_dates.csv
 
-Columns: `subreddit,group,label_start,mandatory_start,label_source,mandatory_source,mandatory_start_loose,notes`.
+Columns: `subreddit,group,label_start,mandatory_start,label_source,mandatory_source,mandatory_start_loose,ban_start,notes`.
 One row per subreddit in `ai_flairs.csv`. Dates are `YYYY-MM-DD` in UTC.
 
 **label_start**: the first date posters could label a post as AI. Take the *earliest* of:
@@ -39,6 +42,10 @@ date and takes priority.
 **mandatory_start_loose**: a looser reading for robustness. Also counts a plain instruction in the
 subreddit's rules list ("Tag AI posts using the flair", "select the AI Generated flair") with no
 "must" or removal wording. Equal to `mandatory_start` when the strict wording is present.
+
+**ban_start**: the first date AI posts are banned outright (or confined to a megathread), from a moderator
+announcement. Empty if never. A comparison subreddit stops counting from this date, since its labeled
+share no longer reflects voluntary labeling.
 
 **group**: how the rule changed, which decides each subreddit's role in the design.
 - `switcher`: a voluntary period, then a mandatory rule (`mandatory_start` set). These are the treated units.

@@ -41,18 +41,21 @@ def monthly(panel):
     return m
 
 
-def controls_for(sub, rules, k=PLOT_K):
-    """Subreddits whose label stays voluntary through sub's event window."""
-    end = rules.loc[sub, "E"] + (k - 1)
-    ok = rules.index[(rules["group"] == "voluntary_throughout")
-                     | ((rules["group"] == "switcher") & (rules["E"] > end))]
+def controls_for(sub, rules, k=EST_K):
+    """Subreddits whose label exists and stays voluntary, with no AI ban, for the whole estimation window,
+    so the control group does not change composition inside it."""
+    start, end = rules.loc[sub, "E"] - k, rules.loc[sub, "E"] + (k - 1)
+    ok = rules.index[((rules["group"] == "voluntary_throughout")
+                      | ((rules["group"] == "switcher") & (rules["E"] > end)))
+                     & (rules["L"] <= start) & (rules["B"] > end)]
     return [s for s in ok if s != sub]
 
 
 def control_share(m, controls, rules):
-    """Pooled flaired share of the controls by month, counting each only after its label exists."""
+    """Pooled flaired share of the controls by month, counting each only after its label exists and
+    before any ban on AI posts."""
     c = m[m["subreddit"].isin(controls)]
-    c = c[c["t"] >= c["subreddit"].map(rules["L"])]
+    c = c[(c["t"] >= c["subreddit"].map(rules["L"])) & (c["t"] < c["subreddit"].map(rules["B"]))]
     g = c.groupby("t")[["ai_flair_posts", "posts"]].sum()
     return g["ai_flair_posts"] / g["posts"]
 
@@ -140,6 +143,7 @@ def main():
     rules = pd.read_csv(RULE_DATES).set_index("subreddit")
     rules["L"] = pd.PeriodIndex(rules["label_start"].str[:7], freq="M")
     rules["E"] = pd.PeriodIndex(rules["mandatory_start"].str[:7].fillna("2099-12"), freq="M")
+    rules["B"] = pd.PeriodIndex(rules["ban_start"].str[:7].fillna("2099-12"), freq="M")
     m = monthly(pd.read_csv(DERIVED / "reddit_subreddit_months.csv"))
     switchers = rules.index[rules["group"] == "switcher"].sort_values(key=lambda s: rules.loc[s, "E"])
     OUTPUT.mkdir(exist_ok=True)
@@ -165,9 +169,9 @@ def plot(panels, path, title, ylabel, control_label, zero_floor=False):
         ax.axvline(-0.5, color=MUTED, lw=1, ls=(0, (3, 3)), zorder=1)
         ax.plot(ks, ctrl.reindex(months).to_numpy(), color=CONTROL, lw=2, marker="o", ms=4, zorder=2)
         ax.plot(ks, own.reindex(months).to_numpy(), color=SWITCHER, lw=2, marker="o", ms=4, zorder=3)
-        ax.set_title(head, loc="left", fontsize=9.5, color=INK)
-        ax.text(0.99, 0.95, "controls: " + ", ".join(controls), transform=ax.transAxes, ha="right", va="top",
-                fontsize=7.5, color=MUTED, wrap=True)
+        ax.set_title(head, loc="left", fontsize=9.5, color=INK, pad=16)
+        ax.text(0, 1.015, "controls: " + ", ".join(controls), transform=ax.transAxes, ha="left", va="bottom",
+                fontsize=7.5, color=MUTED)
         ax.grid(axis="y", color=GRID, lw=0.8)
         ax.tick_params(colors=MUTED, labelsize=8)
         for side in ("top", "right"):

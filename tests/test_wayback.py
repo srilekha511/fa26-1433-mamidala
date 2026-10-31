@@ -59,3 +59,19 @@ def test_decode_body_handles_gzipped_raw_snapshots():
     html = "<p>AI posts must be flaired.</p>"
     assert wayback.decode_body(gzip.compress(html.encode())) == html
     assert wayback.decode_body(html.encode()) == html
+
+
+def test_extract_rule_text_reads_new_reddit_rules_widgets():
+    shreddit = """<html><body><shreddit-post>AI post title in the feed</shreddit-post>
+<faceplate-tracker source="rules_widget" noun="rules"><span>8</span><h2>All AI art must be tagged</h2></faceplate-tracker>
+</body></html>"""
+    assert wayback.ai_snippets(wayback.extract_rule_text(shreddit)) == ["All AI art must be tagged"]
+    redesign = """<html><body><div><p>AI post in the feed</p></div><div class="x"><div>r/sub Rules</div>
+<div>1.</div><div>Tag AI art with the AI flair</div></div></body></html>"""
+    assert wayback.ai_snippets(wayback.extract_rule_text(redesign)) == ["Tag AI art with the AI flair"]
+
+
+def test_extract_rule_text_reads_nested_blocks_once():
+    html = """<aside aria-label="Community information"><h2>Tag AI art</h2>
+<faceplate-tracker source="rules_widget"><h2>No AI spam</h2></faceplate-tracker></aside>"""
+    assert wayback.ai_snippets(wayback.extract_rule_text(html)) == ["Tag AI art", "No AI spam"]

@@ -21,6 +21,8 @@ Reddit sample, in order. Steps marked *by hand* edit files in `data/hand_coded/`
 
 Search for more study subreddits: `python3 code/find_label_rule_subreddits.py`, then
 `python3 code/find_ai_flair_subreddits.py data/derived/airules_label_candidates.csv voluntary,switcher,ban`.
+Then `python3 code/build_expansion_review.py` and read `data/derived/expansion_review.md`; approved subreddits
+go into `ai_flairs.csv` and through steps 2-7 like the original ones.
 
 Earlier exploratory scripts: `code/fetch_flair_counts.py`, then `code/plot_wallpaper_flair.py`.
 

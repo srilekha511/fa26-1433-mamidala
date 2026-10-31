@@ -45,6 +45,12 @@ def problems(rows, study):
                 out.append(f"{sub}: mandatory_start is before label_start")
             if not r["mandatory_source"]:
                 out.append(f"{sub}: mandatory_source is empty")
+        if r.get("ban_start"):
+            ban = _parse(r["ban_start"])
+            if ban is None:
+                out.append(f"{sub}: ban_start {r['ban_start']!r} is not YYYY-MM-DD")
+            elif label and ban < label:
+                out.append(f"{sub}: ban_start is before label_start")
     out += [f"{sub}: missing from reddit_rule_dates.csv" for sub in study if sub not in seen]
     return out
 
