@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from analyze_ban_did import event_study, pooled, trend_break
+from analyze_ban_did import event_study, growth_matches, pooled, trend_break
 from build_ban_sample import ban_event, is_ban
 
 JUL = 1690000000  # 2023-07-22
@@ -70,3 +70,13 @@ def test_trend_break_separates_a_pre_trend_from_a_jump():
     assert tb["trend"][0] == pytest.approx(0.1)
     assert tb["jump"][0] == pytest.approx(0.5)
     assert tb["slope_change"][0] == pytest.approx(0.0, abs=1e-9)
+
+
+def test_growth_matches_picks_the_control_on_the_same_path():
+    t = pd.period_range("2023-01", periods=24, freq="M")
+    logs = pd.DataFrame({"ban": 4 + 0.05 * np.arange(24), "flat": np.full(24, 4.0),
+                         "grower": 4 + 0.05 * np.arange(24) + 0.01, "big": np.full(24, 7.0)}, index=t)
+    treated = pd.DataFrame({"ban_date": ["2024-01-10"]}, index=["ban"])
+    controls = pd.DataFrame({"subreddit": ["flat", "grower", "big"]})
+    m = growth_matches(treated, controls, logs, np.expm1(logs), (-12, -1), k=1)
+    assert m.to_dict("records") == [{"subreddit": "grower", "matched_to": "ban"}]

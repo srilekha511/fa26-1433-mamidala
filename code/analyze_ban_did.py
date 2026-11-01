@@ -3,6 +3,7 @@ same AIRules topic.
 
 Usage: python3 code/analyze_ban_did.py   (after build_ban_sample.py)
 Writes output/ban_event_study.png, output/ban_event_study.csv (one coefficient per month),
+output/ban_matched_estimates.csv (the growth-matched checks),
 output/ban_did_estimates.csv (the pooled estimate and its robustness checks) and output/ban_trend_break.csv
 (banned subreddits' own pre-ban trend and its break at the ban, for when the pre-trend test fails).
 
@@ -15,6 +16,12 @@ The outcome is log(1 + posts); estimates are reported as percent changes.
 
 A subreddit enters a stack only with a median of at least MIN_MEDIAN_POSTS posts a month over the 12 months
 before that stack's ban month.
+
+Banned subreddits grow faster than their topic's comparison subreddits before the ban, so a second comparison
+group is matched on growth (growth_matches): for each ban, the MATCH_K comparison subreddits, from any topic,
+nearest in mean log posts and the trend in log posts over a pre-ban window. Matching on the whole year before
+the ban flattens the pre-ban coefficients by construction, so a check matches on months -12..-7 only and
+leaves -6..-1 to show whether the paths still agree. Writes output/ban_matched_event_study.png and .csv.
 """
 
 import matplotlib
@@ -25,13 +32,15 @@ import numpy as np
 import pandas as pd
 from scipy.stats import chi2, norm
 
-from analyze_reddit_did import GRID, INK, MUTED, SURFACE, SWITCHER
+from analyze_reddit_did import CONTROL, GRID, INK, MUTED, SURFACE, SWITCHER
 from reddit_subreddits import FIRST_MONTH, LAST_MONTH, ROOT
 
 DERIVED = ROOT / "data" / "derived"
 OUTPUT = ROOT / "output"
 PLOT_K, EST_K, PRE_MONTHS = 12, 6, 12
 MIN_MEDIAN_POSTS = 30  # same floor as the label study
+MATCH_K = 3  # growth-matched comparison subreddits per ban, as for the switchers
+MATCH_WINDOWS = {"matched on growth, months -12..-1": (-12, -1), "matched on growth, months -12..-7 only": (-12, -7)}
 
 
 def load():
@@ -71,6 +80,30 @@ def stacks(treated, controls, logs, posts, k=PLOT_K, matched_only=False):
         long = y.reset_index(names="rel").melt(id_vars="rel", var_name="subreddit", value_name="y")
         out.append(long.assign(stack=sub, treated=long["subreddit"] == sub))
     return pd.concat(out, ignore_index=True)
+
+
+def growth_features(logs, sub, months):
+    """Mean and per-month trend of log(1 + posts) over the given months."""
+    y = logs.loc[months, sub].to_numpy()
+    return y.mean(), np.polyfit(np.arange(len(y)), y, 1)[0]
+
+
+def growth_matches(treated, controls, logs, posts, window, k=MATCH_K):
+    """For each ban, the k comparison subreddits (any topic, active in the year before the ban) nearest in mean
+    log posts and trend over months window[0]..window[1] relative to the ban, on standardized distance. A
+    comparison subreddit can match several bans, since each ban has its own stack."""
+    pool = [c for c in controls["subreddit"].unique() if c in posts]
+    out = []
+    for sub, t in treated.iterrows():
+        event = pd.Period(t["ban_date"][:7], "M")
+        months = [event + r for r in range(window[0], window[1] + 1)]
+        if sub not in posts or months[0] < logs.index[0]:
+            continue
+        cands = active(posts, pool, event)
+        f = pd.DataFrame({c: growth_features(logs, c, months) for c in cands}, index=["mean", "trend"]).T
+        dist = np.sqrt((((f - growth_features(logs, sub, months)) / f.std()) ** 2).sum(axis=1))
+        out += [{"subreddit": c, "matched_to": sub} for c in dist.nsmallest(k).index]
+    return pd.DataFrame(out)
 
 
 def demean(df, cols):
@@ -171,6 +204,49 @@ def main():
     print("trend break (±12 months): " + "; ".join(f"{k} {100 * np.expm1(b):+.2f}% (p = {p:.3f})"
                                                   for k, (b, se, p) in tb.items()))
     plot(table, est.iloc[0], pre_p, OUTPUT / "ban_event_study.png")
+
+    matched_rows, paths = [], {}
+    for name, window in MATCH_WINDOWS.items():
+        d = stacks(treated, growth_matches(treated, controls, logs, posts, window), logs, posts, matched_only=True)
+        paths[name], p = event_study(d)
+        tb = trend_break(d)
+        matched_rows.append({"spec": name, **pooled(d, EST_K), "pre_trend_p": p,
+                             **{f"{k}_pct": 100 * np.expm1(b) for k, (b, se, _) in tb.items()},
+                             **{f"{k}_p": q for k, (b, se, q) in tb.items()}})
+    matched = pd.DataFrame(matched_rows)
+    matched.round(4).to_csv(OUTPUT / "ban_matched_estimates.csv", index=False)
+    pd.concat([t.assign(spec=n) for n, t in paths.items()]).round(4).to_csv(OUTPUT / "ban_matched_event_study.csv",
+                                                                           index=False)
+    print(matched.round(3).to_string(index=False))
+    plot_matched(paths, OUTPUT / "ban_matched_event_study.png")
+
+
+def plot_matched(paths, path):
+    fig, ax = plt.subplots(figsize=(8, 4.6), facecolor=SURFACE)
+    ax.set_facecolor(SURFACE)
+    pct = lambda x: 100 * np.expm1(x)
+    ax.axhline(0, color=MUTED, lw=1, zorder=1)
+    ax.axvline(-0.5, color=MUTED, lw=1, ls=(0, (3, 3)), zorder=1)
+    for (name, t), color, (lo, hi) in zip(paths.items(), [SWITCHER, CONTROL], MATCH_WINDOWS.values()):
+        ax.axvspan(lo - 0.5, hi + 0.5, ymin=0, ymax=0.025, color=color, lw=0, zorder=1)
+        ax.fill_between(t["rel"], pct(t["coef"] - 1.96 * t["se"]), pct(t["coef"] + 1.96 * t["se"]),
+                        color=color, alpha=0.12, lw=0, zorder=1)
+        ax.plot(t["rel"], pct(t["coef"]), color=color, lw=2, marker="o", ms=4, zorder=3,
+                label=f"Comparison subreddits {name} (marked on the axis)".replace("..", " to "))
+    fig.suptitle("Posts per month around an AI ban, against subreddits matched on pre-ban growth",
+                 x=0.01, ha="left", fontsize=12, color=INK)
+    ax.legend(loc="upper left", frameon=False, fontsize=8.5, labelcolor=INK)
+    ax.set_xlabel("Months relative to the ban", color=MUTED, fontsize=9)
+    ax.set_ylabel("Change in posts vs matched subreddits (%)", color=MUTED, fontsize=9)
+    ax.grid(axis="y", color=GRID, lw=0.8)
+    ax.tick_params(colors=MUTED, labelsize=8)
+    for side in ("top", "right"):
+        ax.spines[side].set_visible(False)
+    for side in ("left", "bottom"):
+        ax.spines[side].set_color(GRID)
+    fig.tight_layout()
+    fig.savefig(path, dpi=200, bbox_inches="tight", facecolor=SURFACE)
+    plt.close(fig)
 
 
 def plot(table, main, pre_p, path):
