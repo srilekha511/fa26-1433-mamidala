@@ -19,6 +19,10 @@ Reddit sample, in order. Steps marked *by hand* edit files in `data/hand_coded/`
    then `python3 code/select_controls.py` (matched control subreddits for posts per month)
 9. `python3 code/analyze_reddit_did.py` (baseline event studies, figures in `output/`)
 
+AI-ban event study (needs only the AIRules download from step 8; no hand coding):
+`python3 code/build_ban_sample.py` (bans dated from Reddit's rule timestamps, comparison subreddits and their
+monthly post counts), then `python3 code/analyze_ban_did.py` (stacked event study, figure and estimates in `output/`).
+
 Search for more study subreddits: `python3 code/find_label_rule_subreddits.py`, then
 `python3 code/find_ai_flair_subreddits.py data/derived/airules_label_candidates.csv voluntary,switcher,ban`.
 Then `python3 code/build_expansion_review.py` and read `data/derived/expansion_review.md`; approved subreddits

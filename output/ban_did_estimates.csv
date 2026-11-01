@@ -1,0 +1,8 @@
+spec,did_log,se,did_pct,ci_low_pct,ci_high_pct,p,n_bans,n_comparison,pre_trend_p
+"main: topic comparison group, +/-6 months",0.1173,0.0302,12.4506,5.9883,19.3069,0.0001,351,608,0.0087
++/-12 months,0.191,0.0369,21.0455,12.6095,30.1134,0.0,351,608,
+own 2 matched comparison subreddits only,0.0923,0.0267,9.672,4.0843,15.5596,0.0005,309,524,
+Content Generation communities,0.151,0.0399,16.3038,7.5457,25.7752,0.0002,240,564,
+other communities,0.0433,0.037,4.4237,-2.879,12.2755,0.2419,111,524,
+drop bans dated by a full rule rewrite,0.118,0.0305,12.5231,5.9841,19.4656,0.0001,346,608,
+placebo: ban moved 12 months earlier,0.0852,0.0321,8.8907,2.2423,15.9713,0.0081,254,602,
