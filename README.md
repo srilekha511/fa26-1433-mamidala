@@ -22,6 +22,9 @@ Reddit sample, in order. Steps marked *by hand* edit files in `data/hand_coded/`
 AI-ban event study (needs only the AIRules download from step 8; no hand coding):
 `python3 code/build_ban_sample.py` (bans dated from Reddit's rule timestamps, comparison subreddits and their
 monthly post counts), then `python3 code/analyze_ban_did.py` (stacked event study, figure and estimates in `output/`).
+AI share of text posts around the bans: `python3 code/sample_ban_text.py screen` (which subreddits post mostly
+text), `python3 code/sample_ban_text.py sample` (frozen sample of random days before and after each ban, and before
+ChatGPT), then `python3 code/score_pangram.py` (open Pangram; accept the model's terms on Hugging Face first).
 
 Search for more study subreddits: `python3 code/find_label_rule_subreddits.py`, then
 `python3 code/find_ai_flair_subreddits.py data/derived/airules_label_candidates.csv voluntary,switcher,ban`.
