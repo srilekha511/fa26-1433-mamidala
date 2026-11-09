@@ -26,6 +26,15 @@ AI share of text posts around the bans: `python3 code/sample_ban_text.py screen`
 text), `python3 code/sample_ban_text.py sample` (frozen sample of random days before and after each ban, and before
 ChatGPT), then `python3 code/score_pangram.py` (open Pangram; accept the model's terms on Hugging Face first).
 
+Substack sample (branch `substack-pipeline`). `code/substack.py` reads Substack's public JSON endpoints
+(unofficial; the archive pages by cursor, which the substack-api package does not yet handle).
+`python3 code/substack_pilot.py` draws the pilot posts into `data/hand_coded/substack_pilot.csv`, then *by hand*:
+open each `reader_url` logged in, run "Scan for AI text" and fill in the blank columns (see the script's docstring).
+`python3 code/check_substack_pilot.py` checks the filled sheet and tabulates status by window and time per post.
+Full sample (not yet run; waits on the terms-of-service question): `python3 code/build_substack_frame.py list`
+snapshots the category listings, `... archive` draws publications active before the launch and saves their post
+lists. `python3 code/substack_text.py IDS.csv OUT.parquet` fetches post text in the format the Pangram scorers read.
+
 Search for more study subreddits: `python3 code/find_label_rule_subreddits.py`, then
 `python3 code/find_ai_flair_subreddits.py data/derived/airules_label_candidates.csv voluntary,switcher,ban`.
 Then `python3 code/build_expansion_review.py` and read `data/derived/expansion_review.md`; approved subreddits
