@@ -15,6 +15,14 @@ Unweighted, each scored post counts once; weighted by `cap_weight`, each subredd
 text posts, so the estimate is a change in the share of all text posts. A third version weights every ban equally:
 the mean across bans of each ban's own 2x2 difference.
 
+Rule read (data/hand_coded/ban_rule_read_text.csv): checks keep only the bans whose rule covers text posts, or drop the
+rules that do not ban AI content. Only 2 bans that cover only images are scored, too few for a placebo.
+
+Catch-up: banned subreddits start with a lower flagged share than their comparison subreddits, and low-AI communities
+may catch up as AI use spreads, whether or not they ban it. The check adds each subreddit's pre-ban flagged share x
+post. Measuring that share on the same posts the estimate uses would build in regression to the mean, so the pre-ban
+posts are split in two by their random rank: one half measures the share, the other half enters the estimate.
+
 Heterogeneity: the trend-break regression of analyze_ban_did (log posts, banned subreddit against its topic
 comparison group, +/-12 months) on the text bans, with the jump and slope change interacted with the ban's pre-ban
 flagged share. If AI posters leave at a ban, the slowdown should be larger where AI posting was more common.
@@ -34,6 +42,7 @@ from reddit_subreddits import ROOT
 from score_pangram_api import CHOSEN, SCORES, wilson
 
 OUTPUT = ROOT / "output"
+RULES = ROOT / "data" / "hand_coded" / "ban_rule_read_text.csv"
 WINDOWS = ["baseline", "pre", "post"]
 MIN_CELL = 10  # posts per ban-group-window for the equal-weight version, so one post cannot swing a ban
 
@@ -44,6 +53,9 @@ def load():
     df = chosen.merge(scores, on="id")
     df["ai"] = (df["prediction_short"] == "AI").astype(float)
     df["treated"] = df["role"] == "treated"
+    rules = pd.read_csv(RULES).set_index("subreddit")
+    df["scope"] = df["stack"].map(rules["scope"])
+    df["covers_text"] = df["stack"].map(rules["covers_text_posts"])
     return df, len(chosen)
 
 
@@ -55,12 +67,14 @@ def dummies(keys):
     return out
 
 
-def did(df, y="ai", weight=None):
-    """treated x post with stack-by-subreddit and stack-by-window fixed effects; SEs clustered by subreddit."""
+def did(df, y="ai", weight=None, extra=()):
+    """treated x post with stack-by-subreddit and stack-by-window fixed effects; SEs clustered by subreddit.
+    Columns named in extra are added as regressors, and their coefficients are returned too."""
     d = df[df["window"].isin(["pre", "post"])]
     if d.loc[d["treated"], "window"].nunique() < 2 or d.loc[~d["treated"], "window"].nunique() < 2:
         return None
     x = np.column_stack([(d["treated"] & (d["window"] == "post")).to_numpy(float),
+                         *[d[c].to_numpy(float) for c in extra],
                          dummies(d["stack"] + "|" + d["subreddit"]),
                          dummies(d["stack"] + "|" + d["window"])[:, 1:]])
     w = np.ones(len(d)) if weight is None else d[weight].to_numpy() / d[weight].mean()
@@ -72,10 +86,27 @@ def did(df, y="ai", weight=None):
     scores = np.zeros((groups.max() + 1, x.shape[1]))
     np.add.at(scores, groups, xw * (yv - x @ b)[:, None])
     g = len(scores)
-    se = np.sqrt((bread @ scores.T @ scores @ bread)[0, 0] * g / (g - 1))
-    return {"did_pp": 100 * b[0], "se_pp": 100 * se, "ci_low_pp": 100 * (b[0] - 1.96 * se),
-            "ci_high_pp": 100 * (b[0] + 1.96 * se), "p": 2 * norm.sf(abs(b[0] / se)),
-            "n_bans": int(d.loc[d["treated"], "stack"].nunique()), "n_subreddits": g, "n_posts": len(d)}
+    ses = np.sqrt(np.diag(bread @ scores.T @ scores @ bread) * g / (g - 1))
+    se = ses[0]
+    out = {"did_pp": 100 * b[0], "se_pp": 100 * se, "ci_low_pp": 100 * (b[0] - 1.96 * se),
+           "ci_high_pp": 100 * (b[0] + 1.96 * se), "p": 2 * norm.sf(abs(b[0] / se)),
+           "n_bans": int(d.loc[d["treated"], "stack"].nunique()), "n_subreddits": g, "n_posts": len(d)}
+    for i, c in enumerate(extra, 1):
+        out[f"{c}_coef"], out[f"{c}_p"] = b[i], 2 * norm.sf(abs(b[i] / ses[i]))
+    return out
+
+
+def catch_up(df):
+    """did() with each subreddit's pre-ban flagged share (from one random half of its pre-ban posts) x post, estimated
+    on the other half of the pre-ban posts and all post-ban posts. Its coefficient is the extra rise in the flagged
+    share per unit of pre-ban share (-0.4: a subreddit starting 1 point lower rises 0.4 points more)."""
+    pre = df[df["window"] == "pre"]
+    half = pre["rank"] % 2 == 0
+    share = pre[half].groupby("subreddit")["ai"].mean()
+    d = pd.concat([pre[~half], df[df["window"] == "post"]])
+    d = d[d["subreddit"].isin(share.index)]
+    d = d.assign(pre_share_x_post=d["subreddit"].map(share - share.mean()) * (d["window"] == "post"))
+    return did(d, extra=["pre_share_x_post"])
 
 
 def ban_level(df, y="ai", min_cell=MIN_CELL):
@@ -197,7 +228,11 @@ def main():
              (f"flagged AI, each ban weighted equally (mean of 2x2s, cells of {MIN_CELL}+ posts)", ban_level(df)),
              ("AI fraction of the text, unweighted", did(df, y="fraction_ai")),
              ("flagged AI or Mixed, unweighted", did(df.assign(ai=(df["prediction_short"] != "Human").astype(float)))),
-             ("drop the coparenting stack (VirtualAssistant)", did(va_free))]
+             ("drop the coparenting stack (VirtualAssistant)", did(va_free)),
+             ("rule read: only bans whose rule covers text posts", did(df[df["covers_text"] == "yes"])),
+             ("rule read: drop the 4 rules that do not ban AI content", did(df[df["scope"] != "not_ban"])),
+             ("catch-up: adjust for pre-ban share (independent half) x post", catch_up(df)),
+             ("catch-up adjusted, only bans whose rule covers text posts", catch_up(df[df["covers_text"] == "yes"]))]
     est = pd.DataFrame([{"spec": name, **r} for name, r in specs if r])
     est.round(4).to_csv(OUTPUT / "ban_ai_share_estimates.csv", index=False)
     print(est.round(3).to_string(index=False))
