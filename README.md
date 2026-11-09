@@ -25,6 +25,8 @@ monthly post counts), then `python3 code/analyze_ban_did.py` (stacked event stud
 AI share of text posts around the bans: `python3 code/sample_ban_text.py screen` (which subreddits post mostly
 text), `python3 code/sample_ban_text.py sample` (frozen sample of random days before and after each ban, and before
 ChatGPT), then `python3 code/score_pangram.py` (open Pangram; accept the model's terms on Hugging Face first).
+The paid run used the Pangram API instead: `python3 code/score_pangram_api.py select`, then `run N` in batches, then
+`python3 code/analyze_ban_ai_share.py` (flagged share by window, difference-in-differences, figure in `output/`).
 
 Search for more study subreddits: `python3 code/find_label_rule_subreddits.py`, then
 `python3 code/find_ai_flair_subreddits.py data/derived/airules_label_candidates.csv voluntary,switcher,ban`.

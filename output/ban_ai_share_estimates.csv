@@ -1,0 +1,7 @@
+spec,did_pp,se_pp,ci_low_pp,ci_high_pp,p,n_bans,n_subreddits,n_posts
+"main: flagged AI, unweighted",0.9947,0.6643,-0.3073,2.2967,0.1343,56,132.0,10265
+"flagged AI, weighted to all text posts",1.4816,0.623,0.2606,2.7027,0.0174,56,132.0,10265
+"flagged AI, each ban weighted equally (mean of 2x2s, cells of 10+ posts)",0.7613,0.8391,-0.8834,2.4059,0.3643,37,,8884
+"AI fraction of the text, unweighted",0.8749,0.7224,-0.541,2.2909,0.2259,56,132.0,10265
+"flagged AI or Mixed, unweighted",0.6111,0.8322,-1.02,2.2422,0.4628,56,132.0,10265
+drop the coparenting stack (VirtualAssistant),0.5787,0.5821,-0.5622,1.7197,0.3201,55,129.0,9905

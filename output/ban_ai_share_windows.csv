@@ -1,0 +1,8 @@
+role,window,posts,subreddits,flagged_ai,mixed,ai_pct,ci_low,ci_high,ai_pct_weighted,mean_fraction_ai_pct
+control,baseline,920,74,0,0,0.0,0.0,0.416,0.0,0.0
+treated,baseline,672,54,0,0,0.0,0.0,0.568,0.0,0.0
+control,pre,2702,76,65,26,2.406,1.892,3.054,2.22,2.801
+treated,pre,2328,56,23,23,0.988,0.659,1.478,0.996,1.294
+control,post,2798,74,87,54,3.109,2.528,3.82,3.142,3.885
+treated,post,2437,55,57,43,2.339,1.81,3.018,1.194,2.974
+all,baseline (false-positive rate),1592,128,0,0,0.0,0.0,0.241,,
