@@ -167,6 +167,10 @@ bound), well under the 1-3% being measured.
 | AI fraction of the text | 56 | +0.9 | −0.5 to +2.3 | 0.23 |
 | AI or Mixed | 56 | +0.6 | −1.0 to +2.2 | 0.46 |
 | Drop r/coparenting (its comparison subreddit, r/VirtualAssistant, has the most flagged posts) | 55 | +0.6 | −0.6 to +1.7 | 0.32 |
+| Only bans whose rule covers text posts (rule read) | 45 | +0.7 | −0.8 to +2.2 | 0.36 |
+| Drop the 4 rules that do not ban AI content (rule read) | 52 | +0.6 | −0.8 to +2.0 | 0.38 |
+| **Adjusted for catch-up** | 55 | **+0.4** | −0.9 to +1.8 | 0.50 |
+| Adjusted for catch-up, only bans whose rule covers text posts | 44 | +0.1 | −1.4 to +1.6 | 0.90 |
 
 Dropping one subreddit at a time keeps the main estimate between +0.6 and +1.3
 (`output/ban_ai_share_leave_one_out.csv`). Resampling whole bans gives a slightly wider interval than
@@ -185,18 +189,33 @@ interaction on the slope change. It is +0.5% a month per point of pre-ban AI sha
 interaction on the jump is +0.2% (p = 0.94). The pre-ban shares are small (mean 0.9%) and measured from
 at most 60 posts per ban, so this test has little power, but it points the wrong way for exit.
 
-**What this shows.** Detectable AI text does not fall after a ban. The interval rules out any fall
-larger than about 0.3-0.5 points relative to comparison subreddits; banned subreddits start at 1.0%,
-so a ban that cut more than half of its AI text posts would fall outside it. Either AI posters keep posting
-and moderators do not remove them, or they keep posting and the rule is enforced on reports, not
-detection.
+**Rule read** (`data/hand_coded/ban_rule_read_text.csv`, my draft read of all 83 text bans; you have
+not reviewed it yet). 48 rules ban all AI content, 14 ban AI text specifically, 9 ban only AI images,
+4 ban only AI comments or answers, 4 do not ban AI content (r/chemistry bans "AI bad at chemistry"
+posts, r/linkedin bans engagement tools, r/TranslationStudies bans AI tech support, r/writingadvice
+bans discussion of AI tools), and 4 are partial or unclear. Only 2 image-only bans are in the scored
+sample, too few for a placebo.
 
-**Identifying assumption and bias.** The estimate assumes the banned subreddits' AI share would have
-risen as much as their comparison subreddits' without a ban. Two things bias it:
+**Catch-up.** Banned subreddits start with a lower AI share than their comparison subreddits (1.0%
+against 2.4%), and communities with little AI posting may catch up as AI use spreads, ban or no ban.
+That would bias the estimate upward. The adjusted rows add each subreddit's pre-ban flagged share x
+post. Measuring that share on the same posts the estimate uses would build in regression to the mean,
+so the pre-ban posts are split in two at random: one half measures the share, the other half enters the
+estimate. Catch-up is real: a subreddit that starts 1 point lower rises about 0.36 points more
+(p = 0.003). Adjusting for it moves the estimate from +1.0 to +0.4, and to +0.1 on the bans whose rule
+covers text posts.
 
-- **Catch-up.** Banned subreddits start with a lower AI share (1.0% against 2.4%). If low-AI
-  communities catch up as AI use spreads, their share rises faster regardless of the ban, which biases
-  the estimate upward and could hide a small reduction.
+**What this shows.** There is no evidence that detectable AI text falls after a ban: every estimate is
+zero or positive. But once catch-up is adjusted for, the interval reaches −0.9 points (−1.4 on the
+clean rules), about as large as the banned subreddits' whole pre-ban share of 1.0%. So the data cannot
+rule out a sizable reduction. The defensible statement is "no detectable compliance," not "bans do not
+work." The unadjusted estimate, which rules out falls larger than about 0.3 points, overstates the
+precision because it ignores catch-up.
+
+**Identifying assumption and bias.** The adjusted estimate assumes that, without a ban, a banned
+subreddit's AI share would have risen like a comparison subreddit's with the same pre-ban share. One
+further bias:
+
 - **Evasion.** If a ban makes AI posters edit or "humanize" their text so it is not flagged, the
   flagged share falls even when AI use does not. That biases the estimate downward, toward finding
   compliance; finding none makes the no-compliance result stronger.
@@ -205,13 +224,14 @@ risen as much as their comparison subreddits' without a ban. Two things bias it:
 
 1. Posting does not fall at a ban. Banned subreddits grow faster than matched subreddits in the months
    before the ban, peak in the ban month and then stop gaining (section 4).
-2. The share of text posts flagged as AI keeps rising after a ban, about as fast as in comparison
-   subreddits or faster (section 5).
+2. The share of text posts flagged as AI keeps rising after a ban. Adjusted for catch-up, it rises
+   about as fast as in comparison subreddits (+0.4 points, 95% CI −0.9 to +1.8; section 5).
 3. Bans with more AI posting beforehand do not slow more (section 5).
 
 Together these favor the **selection** reading from the last version over **exit**: moderators ban AI
-during a burst of activity, the burst ends, and AI posting continues. In the model's terms, the ban
-does not make AI creators leave or comply, at least for text that Pangram can detect. This covers text
+during a burst of activity, the burst ends, and AI posting continues. In the model's terms, there is
+no sign that the ban makes AI creators leave or comply, at least for text that Pangram can detect,
+though the AI-share estimate is too imprecise to rule out a moderate reduction. This covers text
 subreddits only; most bans target AI images, which are not scored.
 
 ## 7. Remaining risks
@@ -221,14 +241,13 @@ subreddits only; most bans target AI images, which are not scored.
 - **AI share: text bans only.** 56 of 351 bans, chosen by how much text a subreddit posts. Most bans in
   the sample target AI images, which the text detector cannot score, so this is not the effect of the
   average ban.
-- **AI share: catch-up** (section 5). A check is to compare bans and comparison subreddits with similar
-  pre-ban AI shares, or to estimate the change in proportional terms.
+- **AI share: catch-up** (section 5). The adjustment assumes catch-up is linear in the pre-ban share
+  and the same for banned and comparison subreddits.
 - **AI share: thin per-ban samples.** Each subreddit has at most 60 scored posts per window, so per-ban
   estimates are noisy; only the pooled estimate should be read.
-- **Ban classification.** The ban wording is matched by a pattern, not read by hand. My read of the 83
-  text bans found 8 that ban only images, 4 that ban only AI comments or answers, and 4 that do not ban
-  AI content; none has been removed from either sample. Dropping the 4 non-bans, and using the 8
-  image-only bans as a placebo, are the next checks.
+- **Ban classification.** The ban wording is matched by a pattern. The 83 text bans now have a rule
+  read (section 5), still to be reviewed; dropping the non-bans or keeping only rules that cover text
+  moves the estimate little. The other 268 bans in the posts sample have not been read.
 - **Spillover** (advisor's suggestion on issue #5) is not measured.
 
 ## 8. Appendix: the label study
@@ -268,7 +287,7 @@ treated units, two with a rule change bundled into the mandate. The main figure 
 1. Is the reading in section 6 (selection, not exit) the headline for the Reddit results in the
    November 18 draft, with the growth-matched trend break and the AI-share difference-in-differences as
    the two main estimates?
-2. Should the 4 text "bans" that do not ban AI content come out of both samples before the draft, and
-   should the 8 image-only bans be reported as a placebo?
+2. Should the catch-up-adjusted estimate on the bans whose rule covers text posts be the main AI-share
+   estimate, with the unadjusted one as a check? It is the most credible and the least precise.
 3. Should Avatarthelastairbende and winxclub enter the label appendix as switchers dated by their rule
    timestamps?
