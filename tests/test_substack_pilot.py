@@ -34,3 +34,21 @@ def test_pick_posts_skips_empty_windows():
 
 def test_rank_is_fixed_by_id():
     assert sp.rank(123) == sp.rank(123) and sp.rank(123) != sp.rank(124)
+
+
+def test_listed_pubs_keeps_page_order_so_pilot_pubs_come_first():
+    pages = {0: {"publications": [{"id": i, "language": "en"} for i in range(5)] + [{"id": 99, "language": "es"}],
+                 "more": True},
+             1: {"publications": [{"id": i} for i in range(5, 10)], "more": False}}
+    got = [p["id"] for p in sp.listed_pubs(1, get=lambda url: pages[int(url.rsplit("=", 1)[1])])]
+    assert sorted(got[:5]) == [0, 1, 2, 3, 4] and sorted(got[5:]) == [5, 6, 7, 8, 9]  # page 0 before page 1
+    assert got[:5] == sorted(range(5), key=sp.rank)  # ranked within page, as the pilot was
+    assert 99 not in got
+
+
+def test_carry_over_copies_hand_columns_by_post_id():
+    rows = [{"post_id": 1, **{h: "" for h in sp.HAND}}, {"post_id": 2, **{h: "" for h in sp.HAND}}]
+    coded = {"1": {**{h: "" for h in sp.HAND}, "status": "unavailable", "checked_on": "2026-11-08"}}
+    out = sp.carry_over(rows, coded)
+    assert out[0]["status"] == "unavailable" and out[0]["checked_on"] == "2026-11-08"
+    assert out[1]["status"] == ""

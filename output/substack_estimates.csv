@@ -1,0 +1,4 @@
+estimate,value,ci_low,ci_high,n,note
+off_share,0.2073170731707317,0.12119905956112853,0.30819897084048015,164,63 publications
+labels_change,0.0,-0.11541666666666667,0.11365259740259731,28,publications with posts before and after 2026-10-14
+ai_flagged_switchers_minus_always_on,0.05434782608695651,,,54,"flagged/total: switchers 2/8, always on 9/46; Fisher p=0.66"

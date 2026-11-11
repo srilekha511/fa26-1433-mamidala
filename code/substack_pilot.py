@@ -1,9 +1,13 @@
 """Draw the posts for the pilot hand check of Substack's AI-detection button.
 
-Usage: python3 code/substack_pilot.py
+Usage: python3 code/substack_pilot.py                    the 30-post pilot (2 publications per category)
+       python3 code/substack_pilot.py N OUT.csv           N publications per category, into OUT.csv
+       (e.g. 11 data/hand_coded/substack_sample.csv for about 200 posts)
 
-Publications: PUBS_PER_CATEGORY drawn from the first page of each category in CATEGORIES (Substack's own
-listings, so the draw does not favor writers who discuss Pangram), English only. Posts: from each
+Publications: drawn from each category in CATEGORIES (Substack's own listings, so the draw does not favor
+writers who discuss Pangram), English only, in rank order within the first listing page, then the next page,
+and so on. A larger draw therefore starts with the pilot's publications and posts, and their hand coding is
+copied over from the pilot sheet. Posts: from each
 publication, one free newsletter post of at least MIN_WORDS words (the scanner's minimum) in each window
 after the 2026-07-21 launch. Draws use a rank fixed by the id, so rerunning gives the same sheet.
 
@@ -27,6 +31,7 @@ OUT = ROOT / "data" / "hand_coded" / "substack_pilot.csv"
 SEED = 1433
 CATEGORIES = ["Technology", "U.S. Politics", "Finance", "Culture", "Health & Wellness", "Fiction"]
 PUBS_PER_CATEGORY = 2
+MAX_PAGES = 10  # 25 publications a page
 MIN_WORDS = 100
 WINDOWS = [("jul21_aug", "2026-07-21", "2026-09-01"), ("sep", "2026-09-01", "2026-10-01"),
            ("oct", "2026-10-01", "2026-11-01")]
@@ -60,17 +65,33 @@ def pick_posts(posts):
     return picked
 
 
-def main():
-    if OUT.exists():
-        sys.exit(f"{OUT} exists and may hold hand coding; move it aside to draw again.")
+def listed_pubs(cat_id, get=substack.get_json):
+    """English publications in a category: ranked within listing page 0, then page 1, and so on."""
+    for page in range(MAX_PAGES):
+        reply = get(f"https://substack.com/api/v1/category/public/{cat_id}/all?page={page}")
+        yield from sorted((p for p in reply.get("publications") or []
+                           if (p.get("language") or "en").startswith("en")), key=lambda p: rank(p["id"]))
+        if not reply.get("more"):
+            return
+
+
+def carry_over(rows, coded):
+    """Copy the hand-coded columns from earlier sheets (dicts keyed by post_id) into matching rows."""
+    for r in rows:
+        if str(r["post_id"]) in coded:
+            r.update({h: coded[str(r["post_id"])][h] for h in HAND})
+    return rows
+
+
+def main(n_pubs=PUBS_PER_CATEGORY, out=OUT):
+    if out.exists():
+        sys.exit(f"{out} exists and may hold hand coding; move it aside to draw again.")
     ids = {c["name"]: c["id"] for c in substack.get_json("https://substack.com/api/v1/categories")}
     rows = []
     for cat in CATEGORIES:
-        pubs = substack.get_json(f"https://substack.com/api/v1/category/public/{ids[cat]}/all?page=0")["publications"]
-        pubs = sorted((p for p in pubs if (p.get("language") or "en").startswith("en")), key=lambda p: rank(p["id"]))
         taken = 0
-        for pub in pubs:
-            if taken == PUBS_PER_CATEGORY:
+        for pub in listed_pubs(ids[cat]):
+            if taken == n_pubs:
                 break
             url = f"https://{pub['subdomain']}.substack.com"
             picked = pick_posts(list(substack.iter_archive(url, since=WINDOWS[0][1])))
@@ -82,12 +103,20 @@ def main():
                       "category": cat, "publication": pub["name"], "pub_url": url,
                       "window": window_of(p["post_date"]), "post_date": p["post_date"][:10],
                       "wordcount": p["wordcount"], "title": p["title"], **{h: "" for h in HAND}} for p in picked]
-    with open(OUT, "w", newline="") as f:
+        if taken < n_pubs:
+            print(f"{cat}: only {taken} publications with eligible posts")
+    if out != OUT and OUT.exists():
+        with open(OUT, newline="") as f:
+            rows = carry_over(rows, {r["post_id"]: r for r in csv.DictReader(f)})
+    with open(out, "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=list(rows[0]))
         w.writeheader()
         w.writerows(rows)
-    print(f"Wrote {len(rows)} posts to {OUT}")
+    print(f"Wrote {len(rows)} posts to {out}, {sum(bool(r['checked_on']) for r in rows)} already coded")
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) == 3:
+        main(int(sys.argv[1]), ROOT / sys.argv[2])
+    else:
+        main()

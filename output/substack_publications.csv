@@ -1,0 +1,64 @@
+publication,category,n_posts,n_off,statement,n_scanned,max_ai,mean_ai,pattern,ai_flagged
+Adam Kinzinger,U.S. Politics,3,2,False,1,0.0,0.0,switches,False
+After Dinner Conversation® - Philosophy | Ethics Short Story,Fiction,3,0,True,3,0.0,0.0,always_on,False
+American Economy Daily,Finance,1,0,False,1,78.0,78.0,always_on,True
+Better Brain,Finance,2,0,False,2,100.0,100.0,always_on,True
+Better Brain by Dr. Julie,Health & Wellness,2,0,True,2,0.0,0.0,always_on,False
+Bookfox Writer,Fiction,2,0,False,2,19.0,9.5,always_on,False
+Breathing Space by Camille Styles,Health & Wellness,3,0,False,3,52.0,17.333333333333332,always_on,True
+By Nina Hendrick,Fiction,2,2,False,0,,,always_off,
+Career Brew,Technology,3,3,False,0,,,always_off,
+Cassandra Unchained,Finance,3,0,False,3,8.0,2.6666666666666665,always_on,False
+Catherine Cortez Masto,U.S. Politics,2,0,False,2,0.0,0.0,always_on,False
+Colin Allred,U.S. Politics,3,0,False,3,0.0,0.0,always_on,False
+Compounding Dividends,Finance,3,0,False,3,43.0,14.333333333333334,always_on,False
+Counter Craft,Fiction,3,0,False,3,0.0,0.0,always_on,False
+"Creative, Inspired, ALIVE",Fiction,3,0,False,3,3.0,1.0,always_on,False
+Dan Harris,Health & Wellness,3,0,False,3,0.0,0.0,always_on,False
+Dean Blundell,Culture,3,2,False,1,86.0,86.0,switches,True
+Dr. Gator - Between a Shot and Hard Place,Health & Wellness,3,3,False,0,,,always_off,
+Elevate with Yung Pueblo,Health & Wellness,3,0,False,3,0.0,0.0,always_on,False
+Endless Urgency with Mike Nellis,U.S. Politics,3,3,False,0,,,always_off,
+Exponential View,Technology,1,0,False,1,0.0,0.0,always_on,False
+Gnomenclature - The Hammacher Schlemmer Newsletter,Culture,3,0,False,3,0.0,0.0,always_on,False
+Hallelujah Anyway,Culture,3,1,False,2,0.0,0.0,switches,False
+Haystack Digest,Technology,3,0,False,3,75.0,52.666666666666664,always_on,True
+How They Make Money,Finance,3,0,False,3,84.0,81.0,always_on,True
+JC Andrijeski | Jules D'Or Writing Balcony,Fiction,3,1,False,2,0.0,0.0,switches,False
+Jon Ossoff,U.S. Politics,3,0,False,3,0.0,0.0,always_on,False
+Josh Turek’s Substack,U.S. Politics,2,0,False,2,0.0,0.0,always_on,False
+Julia Kent's Writing Cabin,Fiction,3,3,False,0,,,always_off,
+Kyla’s Newsletter,Technology,2,0,False,2,6.0,3.5,always_on,False
+Latent.Space,Technology,3,0,False,3,24.0,13.333333333333334,always_on,False
+Letters from an American,U.S. Politics,3,0,False,3,0.0,0.0,always_on,False
+Love Caleb,Fiction,1,0,False,1,21.0,21.0,always_on,False
+Love Weekly with Jillian Turecki,Health & Wellness,3,1,False,2,32.0,16.0,switches,False
+Macro Notes,Finance,2,1,False,1,75.0,75.0,switches,True
+MarathonGuide,Health & Wellness,3,0,False,3,100.0,74.33333333333333,always_on,True
+Money Tips Money Hacks,Finance,1,1,False,0,,,always_off,
+Popbitch,Culture,1,0,False,1,0.0,0.0,always_on,False
+Product Growth,Technology,2,0,False,2,3.0,1.5,always_on,False
+Sabrina Ramonov 🍄,Technology,3,0,False,3,0.0,0.0,always_on,False
+Senate Democrats,U.S. Politics,3,0,False,3,0.0,0.0,always_on,False
+Shelf Space Sci-Fi,Fiction,3,1,False,2,0.0,0.0,switches,False
+"Shoddy Goods, from meh.com, by Jason Toon",Culture,3,0,False,3,0.0,0.0,always_on,False
+The Art of Noticing,Culture,3,0,False,3,0.0,0.0,always_on,False
+The Capitalist,Finance,3,0,False,3,81.0,27.0,always_on,True
+The Daily Brief by Zerodha,Finance,2,0,False,2,72.0,59.5,always_on,True
+The Dopamine Dispatch,Health & Wellness,3,0,True,3,0.0,0.0,always_on,False
+The Free Press,U.S. Politics,1,0,False,1,0.0,0.0,always_on,False
+The Gold Trader,Finance,2,0,True,2,0.0,0.0,always_on,False
+The Habit Healers,Health & Wellness,3,3,True,0,,,always_off,
+The New Yorker,Culture,3,2,False,1,0.0,0.0,switches,False
+The Pragmatic Engineer,Technology,3,0,True,3,0.0,0.0,always_on,False
+The Road to November,U.S. Politics,3,0,False,3,22.0,7.333333333333333,always_on,False
+The Romantasy,Fiction,2,2,True,0,,,always_off,
+The System Design Newsletter,Technology,3,0,False,3,83.0,67.66666666666667,always_on,True
+The Vajenda,Health & Wellness,3,0,True,3,0.0,0.0,always_on,False
+Things That Don't Suck,Culture,2,0,False,2,0.0,0.0,always_on,False
+a16z,Technology,3,0,False,3,48.0,23.666666666666668,always_on,False
+enRICHed with Your Rich BFF,Finance,3,0,False,3,35.0,31.333333333333332,always_on,False
+healthful radiance,Health & Wellness,3,0,False,3,0.0,0.0,always_on,False
+milk and cookies,Culture,3,3,False,0,,,always_off,
+speedrun,Technology,3,0,False,3,0.0,0.0,always_on,False
+✿ shit you should care about ✿,Culture,3,0,False,3,0.0,0.0,always_on,False

@@ -18,9 +18,13 @@ import pandas as pd
 from substack_pilot import OUT
 
 STATUSES = {"scannable", "unavailable", "no_option"}
+# Why the popup says detection is unavailable: none_shown (the author's choice, as far as a reader can tell) or
+# a reason the popup gives. Only sheets with an unavailable_reason column are checked for it.
+REASONS = {"none_shown", "paid_only", "too_short", "before_launch"}
 PCTS = ["ai_pct", "ai_assisted_pct", "human_pct"]
 HAND_TARGET = 200
 SUM_TOLERANCE = 2  # the popup rounds each percentage
+AI_FLAG = 50  # ai_pct at or above this is shown in the publication sequences
 
 
 def problems(df):
@@ -34,6 +38,14 @@ def problems(df):
             out.append(f"{pid}: statement {r['statement']!r} should be yes or no")
         if r["statement"] == "yes" and not r["statement_text"]:
             out.append(f"{pid}: statement is yes but statement_text is blank")
+        if r["statement"] == "no" and r["statement_text"]:
+            out.append(f"{pid}: statement is no but statement_text is filled in")
+        if "unavailable_reason" in r:
+            reason = r["unavailable_reason"]
+            if r["status"] == "unavailable" and reason not in REASONS:
+                out.append(f"{pid}: unavailable_reason {reason!r} is not one of {sorted(REASONS)}")
+            if r["status"] != "unavailable" and reason:
+                out.append(f"{pid}: {r['status']} but has unavailable_reason {reason!r}")
         pcts = [pd.to_numeric(r[c], errors="coerce") for c in PCTS]
         filled = [p for p in pcts if pd.notna(p)]
         if r["status"] == "scannable":
@@ -43,9 +55,25 @@ def problems(df):
                 out.append(f"{pid}: percentages sum to {sum(filled):g}, not 100")
         elif filled:
             out.append(f"{pid}: {r['status']} but has percentages")
-        if pd.isna(pd.to_numeric(r["seconds"], errors="coerce")):
+        if r["seconds"] and pd.isna(pd.to_numeric(r["seconds"], errors="coerce")):
             out.append(f"{pid}: seconds {r['seconds']!r} is not a number")
     return out
+
+
+def patterns(done):
+    """Per publication: always scannable, always unavailable, or switches; with the statuses in date order
+    (U unavailable, S scannable, N no option; S78 means scannable with 78% AI)."""
+    def code(r):
+        if r["status"] == "scannable":
+            ai = pd.to_numeric(r["ai_pct"], errors="coerce")
+            return "S" + (f"{ai:g}" if pd.notna(ai) and ai >= AI_FLAG else "")
+        return {"unavailable": "U", "no_option": "N"}.get(r["status"], "?")
+    rows = []
+    for pub, g in done.sort_values("post_date").groupby("publication", sort=True):
+        statuses = set(g["status"])
+        rows.append({"publication": pub, "sequence": " ".join(g.apply(code, axis=1)),
+                     "pattern": "switches" if len(statuses) > 1 else f"always {statuses.pop()}"})
+    return pd.DataFrame(rows)
 
 
 def summarize(df):
@@ -55,6 +83,11 @@ def summarize(df):
         return lines
     lines += ["", "Status by window:", pd.crosstab(done["status"], done["window"], margins=True).to_string()]
     lines += ["", "Statement by status:", pd.crosstab(done["status"], done["statement"], margins=True).to_string()]
+    pats = patterns(done)
+    lines += ["", "Publications by pattern (posts in date order):", pats["pattern"].value_counts().to_string()]
+    switched = pats[pats["pattern"] == "switches"]
+    if not switched.empty:
+        lines += ["", "Publications that switch:", switched[["publication", "sequence"]].to_string(index=False)]
     scanned = done[done["status"] == "scannable"]
     if not scanned.empty:
         lines += ["", "Pangram scores on scannable posts (%):",
