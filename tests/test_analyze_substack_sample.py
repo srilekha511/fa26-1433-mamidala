@@ -68,3 +68,16 @@ def test_estimates_and_bootstrap(df):
     assert est.loc["off_share", "ci_low"] <= 0.5 <= est.loc["off_share", "ci_high"]
     assert est.loc["labels_change", "n"] == 3
     assert "switchers 0/1, always on 1/1" in est.loc["ai_flagged_switchers_minus_always_on", "note"]
+
+
+def test_mean_ai_test():
+    pubs = pd.DataFrame({"pattern": ["switches"] * 2 + ["always_on"] * 3 + ["always_off"],
+                         "mean_ai": [50.0, 70.0, 0.0, 10.0, 20.0, np.nan]})
+    diff, p, na, nb = a.mean_ai_test(pubs, perms=200)
+    assert diff == pytest.approx(50) and (na, nb) == (2, 3) and 0 < p <= 1
+
+
+def test_uncoded_rows_are_ignored(tmp_path):
+    rows = [post(1, "On", "2026-09-01"), [2, "Fiction", "On", "sep", "2026-09-02", "", "", "", "", "", "", ""]]
+    d = a.load(write(tmp_path, rows))
+    assert d["eligible"].tolist() == [True, False]

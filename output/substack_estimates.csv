@@ -1,4 +1,9 @@
-estimate,value,ci_low,ci_high,n,note
-off_share,0.2073170731707317,0.12119905956112853,0.30819897084048015,164,63 publications
-labels_change,0.0,-0.11541666666666667,0.11365259740259731,28,publications with posts before and after 2026-10-14
-ai_flagged_switchers_minus_always_on,0.05434782608695651,,,54,"flagged/total: switchers 2/8, always on 9/46; Fisher p=0.66"
+estimate,value,ci_low,ci_high,n,note,sample
+off_share,0.23778501628664495,0.1399920634920635,0.34185303514376997,307,64 publications,all
+labels_change,-0.03977272727272727,-0.11563210227272726,0.03043478260869565,44,publications with posts before and after 2026-10-14,all
+ai_flagged_switchers_minus_always_on,0.07777777777777778,,,55,"flagged/total: switchers 3/10, always on 10/45; Fisher p=0.69",all
+mean_ai_switchers_minus_always_on,6.349999999999996,,,55,"publication mean ai_pct; 10 switchers, 45 always on; permutation p=0.52",all
+off_share,0.2073170731707317,0.12119905956112853,0.30819897084048015,164,63 publications,first_draw
+labels_change,0.0,-0.11541666666666667,0.11365259740259731,28,publications with posts before and after 2026-10-14,first_draw
+ai_flagged_switchers_minus_always_on,0.05434782608695651,,,54,"flagged/total: switchers 2/8, always on 9/46; Fisher p=0.66",first_draw
+mean_ai_switchers_minus_always_on,7.197463768115943,,,54,"publication mean ai_pct; 8 switchers, 46 always on; permutation p=0.50",first_draw

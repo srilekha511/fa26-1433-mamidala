@@ -20,7 +20,7 @@ from substack_pilot import OUT
 STATUSES = {"scannable", "unavailable", "no_option"}
 # Why the popup says detection is unavailable: none_shown (the author's choice, as far as a reader can tell) or
 # a reason the popup gives. Only sheets with an unavailable_reason column are checked for it.
-REASONS = {"none_shown", "paid_only", "too_short", "before_launch"}
+REASONS = {"none_shown", "paid_only", "too_short", "before_launch", "scan_failed"}
 PCTS = ["ai_pct", "ai_assisted_pct", "human_pct"]
 HAND_TARGET = 200
 SUM_TOLERANCE = 2  # the popup rounds each percentage

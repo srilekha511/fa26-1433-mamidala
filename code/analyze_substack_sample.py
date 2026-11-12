@@ -1,10 +1,10 @@
 """Summarize the hand-coded Substack sample: how often authors turn AI detection off, and who does.
 
-Usage: python3 code/analyze_substack_sample.py [path]   (default data/hand_coded/substack_sample.csv)
+Usage: python3 code/analyze_substack_sample.py [path]   (default data/hand_coded/substack_sample_deep.csv)
 
 A post counts as "detection off" when the reader popup says detection is unavailable and gives no reason
 (unavailable_reason none_shown). Posts the popup says are unavailable for another reason (paid_only,
-too_short, before_launch) are dropped from every denominator. "Off" is as of checked_on: authors can turn
+too_short, before_launch, scan_failed) are dropped from every denominator. "Off" is as of checked_on: authors can turn
 detection off for old posts later.
 
 Writes to output/:
@@ -12,8 +12,13 @@ Writes to output/:
   substack_publications.csv   one row per publication: pattern (always_on / always_off / switches),
                               statement, Pangram scores of its scannable posts
   substack_estimates.csv      overall off share, the within-publication change at the reader labels (both
-                              with publication bootstrap CIs) and the AI-score comparison of switchers with
-                              always-on publications (Fisher's exact test)
+                              with publication bootstrap CIs) and two AI-score comparisons of switchers with
+                              always-on publications: share with a post at AI_FLAG or more (Fisher's exact
+                              test) and mean ai_pct (permutation test). With a draw column (the deepened
+                              sheet from substack_deepen.py), estimates are also given for draw 1 alone
+                              (sample = first_draw), since draw 2 was checked later.
+
+Rows not yet coded (status blank) are ignored, so a partly coded sheet can be run.
 """
 
 import sys
@@ -24,7 +29,7 @@ from scipy.stats import fisher_exact
 
 from reddit_subreddits import ROOT
 
-SAMPLE = ROOT / "data" / "hand_coded" / "substack_sample.csv"
+SAMPLE = ROOT / "data" / "hand_coded" / "substack_sample_deep.csv"
 OUT_DIR = ROOT / "output"
 LABELS_DATE = "2026-10-14"  # Substack started showing reader labels
 AI_FLAG = 50  # a publication is "AI-flagged" if any scannable post has ai_pct at or above this
@@ -98,6 +103,21 @@ def flag_test(pubs):
     return table, fisher_exact(table).pvalue
 
 
+def mean_ai_test(pubs, perms=BOOT, seed=SEED):
+    """Switchers minus always-on in the publication mean of ai_pct over scannable posts, with a two-sided
+    permutation p-value (labels shuffled over publications). Unlike ai_flagged, this does not grow with the
+    number of scans a publication has."""
+    a = pubs[pubs["pattern"] == "switches"]["mean_ai"].dropna().to_numpy()
+    b = pubs[pubs["pattern"] == "always_on"]["mean_ai"].dropna().to_numpy()
+    diff = a.mean() - b.mean()
+    pooled, rng = np.concatenate([a, b]), np.random.default_rng(seed)
+    hits = 0
+    for _ in range(perms):
+        rng.shuffle(pooled)
+        hits += abs(pooled[:len(a)].mean() - pooled[len(a):].mean()) >= abs(diff) - 1e-12
+    return diff, (hits + 1) / (perms + 1), len(a), len(b)
+
+
 def estimates(df, pubs, boot=BOOT):
     e = df[df["eligible"]]
     overall = lambda x: x["off"].mean()
@@ -114,6 +134,10 @@ def estimates(df, pubs, boot=BOOT):
                  "ci_low": np.nan, "ci_high": np.nan, "n": sum(table[0]) + sum(table[1]),
                  "note": f"flagged/total: switchers {table[0][0]}/{sum(table[0])}, always on "
                          f"{table[1][0]}/{sum(table[1])}; Fisher p={p:.2f}"})
+    diff, p, na, nb = mean_ai_test(pubs, boot)
+    rows.append({"estimate": "mean_ai_switchers_minus_always_on", "value": diff, "ci_low": np.nan,
+                 "ci_high": np.nan, "n": na + nb,
+                 "note": f"publication mean ai_pct; {na} switchers, {nb} always on; permutation p={p:.2f}"})
     return pd.DataFrame(rows)
 
 
@@ -125,7 +149,10 @@ def main():
     df["labels"] = np.where(df["after_labels"], f"after {LABELS_DATE}", f"before {LABELS_DATE}")
     sh = pd.concat([shares(df, b) for b in ["window", "category", "labels"]])
     pubs = publications(df)
-    est = estimates(df, pubs)
+    est = estimates(df, pubs).assign(sample="all")
+    if "draw" in df:
+        first = df[df["draw"] == "1"]
+        est = pd.concat([est, estimates(first, publications(first)).assign(sample="first_draw")])
     OUT_DIR.mkdir(exist_ok=True)
     sh.to_csv(OUT_DIR / "substack_off_shares.csv", index=False)
     pubs.to_csv(OUT_DIR / "substack_publications.csv", index=False)
