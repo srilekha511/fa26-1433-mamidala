@@ -18,6 +18,12 @@ Writes to output/:
                               sheet from substack_deepen.py), estimates are also given for draw 1 alone
                               (sample = first_draw), since draw 2 was checked later.
 
+  substack_api_estimates.csv  when API_SCORES exists (score_substack_off.py): agreement of the Pangram API with
+                              the reader scan on posts scored both ways, and the AI share of detection-off
+                              posts (API) against on posts, within switching publications (sign-flip test)
+                              and always off against always on (permutation tests, on posts by API and by
+                              reader scan). Publication means; p-values two-sided.
+
 Rows not yet coded (status blank) are ignored, so a partly coded sheet can be run.
 """
 
@@ -36,6 +42,7 @@ AI_FLAG = 50  # a publication is "AI-flagged" if any scannable post has ai_pct a
 PCTS = ["ai_pct", "ai_assisted_pct", "human_pct"]
 BOOT = 2000
 SEED = 1433
+API_SCORES = ROOT / "data" / "derived" / "substack_off_scores.csv"
 
 
 def load(path=SAMPLE):
@@ -118,6 +125,56 @@ def mean_ai_test(pubs, perms=BOOT, seed=SEED):
     return diff, (hits + 1) / (perms + 1), len(a), len(b)
 
 
+def perm_diff(a_vals, b_vals, perms=BOOT * 10, seed=SEED):
+    """Mean of a minus mean of b, with a two-sided permutation p-value."""
+    a_vals, b_vals = np.asarray(a_vals, float), np.asarray(b_vals, float)
+    diff = a_vals.mean() - b_vals.mean()
+    pooled, rng, hits = np.concatenate([a_vals, b_vals]), np.random.default_rng(seed), 0
+    for _ in range(perms):
+        rng.shuffle(pooled)
+        hits += abs(pooled[:len(a_vals)].mean() - pooled[len(a_vals):].mean()) >= abs(diff) - 1e-9
+    return diff, (hits + 1) / (perms + 1)
+
+
+def sign_flip(d, perms=BOOT * 10, seed=SEED):
+    """Mean of paired differences d, with a two-sided sign-flip p-value."""
+    d = np.asarray(d, float)
+    rng = np.random.default_rng(seed)
+    hits = sum(abs((d * rng.choice([-1, 1], len(d))).mean()) >= abs(d.mean()) - 1e-9 for _ in range(perms))
+    return d.mean(), (hits + 1) / (perms + 1)
+
+
+def api_estimates(df, pubs, scores):
+    """Comparisons that use the Pangram API scores (fraction_ai, 0-1) of off posts and calibration posts."""
+    x = df.merge(scores[["id", "fraction_ai"]].astype({"id": str}), left_on="post_id", right_on="id")
+    x["api"] = 100 * x["fraction_ai"]
+    x["pattern"] = x["publication"].map(pubs.set_index("publication")["pattern"])
+    rows = []
+    both = x[x["status"] == "scannable"].dropna(subset=["ai_pct"])
+    if len(both) > 2:
+        rows.append({"estimate": "api_minus_reader_on_same_posts", "value": (both["api"] - both["ai_pct"]).mean(),
+                     "p": np.nan, "n": len(both),
+                     "note": f"correlation {np.corrcoef(both['api'], both['ai_pct'])[0, 1]:.2f}; same side of "
+                             f"{AI_FLAG}%: {((both['api'] >= AI_FLAG) == (both['ai_pct'] >= AI_FLAG)).mean():.0%}"})
+    sw = x[x["pattern"] == "switches"].groupby(["publication", "off"])["api"].mean().unstack()
+    if {True, False} <= set(sw.columns):
+        d = (sw[True] - sw[False]).dropna()
+        diff, p = sign_flip(d)
+        rows.append({"estimate": "switchers_off_minus_on_api", "value": diff, "p": p, "n": len(d),
+                     "note": f"publications with both scored; {int((d > 0).sum())} higher when off"})
+    off = x[x["pattern"] == "always_off"].groupby("publication")["api"].mean()
+    on_api = x[(x["pattern"] == "always_on")].groupby("publication")["api"].mean()
+    on_reader = pubs[pubs["pattern"] == "always_on"]["mean_ai"].dropna()
+    for name, on in [("api", on_api), ("reader", on_reader)]:
+        if len(off) and len(on):
+            diff, p = perm_diff(off, on)
+            rows.append({"estimate": f"always_off_minus_always_on_{name}", "value": diff, "p": p,
+                         "n": len(off) + len(on),
+                         "note": f"always off {off.mean():.1f} ({len(off)} publications, API) vs always on "
+                                 f"{on.mean():.1f} ({len(on)} publications, {name})"})
+    return pd.DataFrame(rows)
+
+
 def estimates(df, pubs, boot=BOOT):
     e = df[df["eligible"]]
     overall = lambda x: x["off"].mean()
@@ -154,6 +211,9 @@ def main():
         first = df[df["draw"] == "1"]
         est = pd.concat([est, estimates(first, publications(first)).assign(sample="first_draw")])
     OUT_DIR.mkdir(exist_ok=True)
+    if API_SCORES.exists():
+        api = api_estimates(df, pubs, pd.read_csv(API_SCORES, dtype={"id": str}))
+        api.to_csv(OUT_DIR / "substack_api_estimates.csv", index=False)
     sh.to_csv(OUT_DIR / "substack_off_shares.csv", index=False)
     pubs.to_csv(OUT_DIR / "substack_publications.csv", index=False)
     est.to_csv(OUT_DIR / "substack_estimates.csv", index=False)
@@ -164,6 +224,8 @@ def main():
               + pubs.groupby("pattern")[["max_ai", "mean_ai", "ai_flagged"]].mean().round(2).to_string())
         print("\nStatements:\n" + pubs[pubs["statement"]][["publication", "pattern", "max_ai"]].to_string(index=False))
         print("\nEstimates:\n" + est.round(3).to_string(index=False))
+        if API_SCORES.exists():
+            print("\nPangram API comparisons:\n" + api.round(3).to_string(index=False))
 
 
 if __name__ == "__main__":

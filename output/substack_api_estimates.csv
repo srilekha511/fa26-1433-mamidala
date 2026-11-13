@@ -1,0 +1,5 @@
+estimate,value,p,n,note
+api_minus_reader_on_same_posts,2.318391259230612,,68,correlation 0.95; same side of 50%: 97%
+switchers_off_minus_on_api,19.89932252461744,0.060846957652117395,10,publications with both scored; 7 higher when off
+always_off_minus_always_on_api,43.31303245185997,0.0016999150042497876,37,"always off 60.6 (9 publications, API) vs always on 17.2 (28 publications, api)"
+always_off_minus_always_on_reader,45.486154822391185,0.0002999850007499625,54,"always off 60.6 (9 publications, API) vs always on 15.1 (45 publications, reader)"

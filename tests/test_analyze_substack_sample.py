@@ -81,3 +81,19 @@ def test_uncoded_rows_are_ignored(tmp_path):
     rows = [post(1, "On", "2026-09-01"), [2, "Fiction", "On", "sep", "2026-09-02", "", "", "", "", "", "", ""]]
     d = a.load(write(tmp_path, rows))
     assert d["eligible"].tolist() == [True, False]
+
+
+def test_api_estimates(df):
+    # df: On (scannable 0, 80), Off (two off posts), Sw (scannable 10, one off post)
+    scores = pd.DataFrame({"id": ["1", "2", "3", "4", "5", "6"], "fraction_ai": [0.02, 0.78, 0.9, 0.7, 0.1, 0.6]})
+    est = a.api_estimates(df, a.publications(df), scores).set_index("estimate")
+    assert est.loc["api_minus_reader_on_same_posts", "value"] == pytest.approx(0)  # (2-0, -2, 0)/3
+    assert est.loc["switchers_off_minus_on_api", "value"] == pytest.approx(50)
+    assert est.loc["always_off_minus_always_on_api", "value"] == pytest.approx(80 - 40)
+    assert est.loc["always_off_minus_always_on_reader", "value"] == pytest.approx(80 - 40)
+
+
+def test_sign_flip_and_perm():
+    assert a.sign_flip([10, 10, 10, 10, 10, 10], perms=500)[1] < 0.1
+    diff, p = a.perm_diff([1, 2], [1, 2], perms=200)
+    assert diff == 0 and p == 1
