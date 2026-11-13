@@ -1,84 +1,84 @@
 subreddit,scope,covers_text_posts,note,coder
-artbusiness,image_only,no,AI-derived images only; discussion allowed,Claude draft 2026-11-09
-AskHistory,all,yes,posts and comments,Claude draft 2026-11-09
-AskPhysics,text,yes,LLM-generated content posted for checking,Claude draft 2026-11-09
-askswitzerland,text,yes,posts and comments must be in your own words,Claude draft 2026-11-09
-ASOUE,all,yes,"anything that used AI, art and stories",Claude draft 2026-11-09
-atomicheart,all,yes,"posts, comments, videos, art",Claude draft 2026-11-09
-BaldursGate3,all,yes,content and discussion,Claude draft 2026-11-09
-BetaReaders,text,yes,submitted writing and critiques,Claude draft 2026-11-09
-Bible,all,yes,"title says comments, text covers any submission",Claude draft 2026-11-09
-bikepacking,all,yes,,Claude draft 2026-11-09
-cantax,text,yes,copy-pasted AI posts and comments without own input,Claude draft 2026-11-09
-carvana,text,yes,"long AI-written posts, inside a low-effort rule",Claude draft 2026-11-09
-charmed,all,yes,,Claude draft 2026-11-09
-chemistry,not_ban,no,"bans ""AI bad at chemistry"" posts; AI discussion allowed",Claude draft 2026-11-09
-CleaningTips,text,yes,AI text in posts and comments,Claude draft 2026-11-09
-CMT,text,yes,"AI-generated text, for misinformation",Claude draft 2026-11-09
-CommercialAV,all,yes,unless pre-approved; aimed at replies,Claude draft 2026-11-09
-cookingforbeginners,unclear,unclear,says AI is unsuitable; does not say what is removed,Claude draft 2026-11-09
-coparenting,all,yes,,Claude draft 2026-11-09
-coralisland,all,yes,"art, writing or other content",Claude draft 2026-11-09
-cordcutters,text,yes,"AI-generated posts, inside an astroturf rule",Claude draft 2026-11-09
-cryptography,text,yes,AI-generated articles or self posts,Claude draft 2026-11-09
-cyberpunkred,image_only,no,AI images; exception for high-effort posts,Claude draft 2026-11-09
-DarkRomance,text,yes,"""AI content such as ChatGPT"", inside a piracy rule",Claude draft 2026-11-09
-DetroitBecomeHuman,all,yes,all AI content; reason given is art,Claude draft 2026-11-09
-DIY,all,yes,"posts, comments, images, guides, bots",Claude draft 2026-11-09
-dramionebookclub,all,yes,"posts and comments, images and writing prompts",Claude draft 2026-11-09
-drarry,all,yes,stories and fanart,Claude draft 2026-11-09
-drones,all,yes,"""generative AI media"" and ""anything created by"" AI",Claude draft 2026-11-09
-dysautonomia,all,yes,,Claude draft 2026-11-09
-faeries,all,yes,,Claude draft 2026-11-09
-fantasywriters,all,yes,stories or artwork,Claude draft 2026-11-09
-flashlight,all,yes,content and bots without approval,Claude draft 2026-11-09
-GhostAdventures,all,yes,,Claude draft 2026-11-09
-goodworldbuilding,all,yes,images or content,Claude draft 2026-11-09
-Guildwars2,all,yes,"game content in generative AI, citing the EULA; mostly images in practice",Claude draft 2026-11-09
-Intune,comments_only,no,"AI comments; the description says ""we do allow"", probably a typo for do not",Claude draft 2026-11-09
-isfp,unclear,unclear,title bans all AI content; description is about pictures,Claude draft 2026-11-09
-Ithkuil,all,yes,"content, hype and speculation",Claude draft 2026-11-09
-javahelp,all,yes,"any AI content, including answers",Claude draft 2026-11-09
-kimono,all,yes,,Claude draft 2026-11-09
-KiriBaku,image_only,no,AI art posts,Claude draft 2026-11-09
-kubernetes,text,yes,obviously AI-generated articles or comments only; AI as a starting point allowed,Claude draft 2026-11-09
-LancerRPG,all,yes,,Claude draft 2026-11-09
-linkedin,not_ban,no,"bans automated engagement tools, not AI content",Claude draft 2026-11-09
-manufacturing,text,yes,posts and comments written by AI; grammar help allowed,Claude draft 2026-11-09
-merlinfic,text,yes,AI-written fics,Claude draft 2026-11-09
-Metaphysics,all,yes,title only,Claude draft 2026-11-09
-Miata,all,yes,AI pictures and text in posts; comments allowed,Claude draft 2026-11-09
-MortgagesCanada,comments_only,no,copy-pasted AI answers,Claude draft 2026-11-09
-nancydrew,image_only,no,AI images,Claude draft 2026-11-09
-nonduality,all,yes,AI-generated posts,Claude draft 2026-11-09
-OneTruthPrevails,all,yes,,Claude draft 2026-11-09
-osr,all,yes,,Claude draft 2026-11-09
-patentexaminer,all,yes,posts and comments passed off as human,Claude draft 2026-11-09
-POTS,all,yes,,Claude draft 2026-11-09
-Proxmox,all,yes,posts and comments,Claude draft 2026-11-09
-raspberryDIY,all,yes,,Claude draft 2026-11-09
-roseanne,all,yes,,Claude draft 2026-11-09
-sales,all,yes,posts and comments,Claude draft 2026-11-09
-salesforce,all,yes,posts and comments,Claude draft 2026-11-09
-SBCGaming,all,yes,,Claude draft 2026-11-09
-schizophrenia,partial,unclear,"LLM-generated content not accepted as a source, inside a misinformation rule",Claude draft 2026-11-09
-shadowhunters,image_only,no,AI art,Claude draft 2026-11-09
-Shadowrun,partial,unclear,posts focused on AI content; AI art allowed as a minor part,Claude draft 2026-11-09
-ShiningForce,image_only,no,AI art,Claude draft 2026-11-09
-SignoraMains,image_only,no,artwork rules,Claude draft 2026-11-09
-skinwalkerranch,all,yes,"images, video and text, except meme Fridays",Claude draft 2026-11-09
-socialanxiety,all,yes,title bans all AI content; description is about comments,Claude draft 2026-11-09
-solarenergy,text,yes,ChatGPT or AI-written posts,Claude draft 2026-11-09
-Superhero_Ideas,image_only,no,"title ""No AI""; description is about images",Claude draft 2026-11-09
-swrpg,all,yes,"text, images, video, code",Claude draft 2026-11-09
-tales,image_only,no,AI art,Claude draft 2026-11-09
-TheMagnusArchives,all,yes,exclusively AI content: art and prose,Claude draft 2026-11-09
-ThirdLifeSMP,all,yes,"visual, audio and text",Claude draft 2026-11-09
-todoist,comments_only,no,AI comments,Claude draft 2026-11-09
-TranslationStudies,not_ban,no,no tech support for AI translation tools,Claude draft 2026-11-09
-truenas,comments_only,no,AI answers to questions,Claude draft 2026-11-09
-TwoHotTakes,all,yes,"""no AI content of any kind"" in posts",Claude draft 2026-11-09
-vndevs,all,yes,assets and discussion,Claude draft 2026-11-09
-voynich,all,yes,"art or text, including AI-touched-up content",Claude draft 2026-11-09
-WoT,all,yes,images and text,Claude draft 2026-11-09
-writingadvice,not_ban,no,"bans discussion of AI writing tools, not AI-written posts",Claude draft 2026-11-09
+artbusiness,image_only,no,AI-derived images only; discussion allowed,Claude draft 2026-11-09; reviewed by user 2026-11-13
+AskHistory,all,yes,posts and comments,Claude draft 2026-11-09; reviewed by user 2026-11-13
+AskPhysics,text,yes,LLM-generated content posted for checking,Claude draft 2026-11-09; reviewed by user 2026-11-13
+askswitzerland,text,yes,posts and comments must be in your own words,Claude draft 2026-11-09; reviewed by user 2026-11-13
+ASOUE,all,yes,"anything that used AI, art and stories",Claude draft 2026-11-09; reviewed by user 2026-11-13
+atomicheart,all,yes,"posts, comments, videos, art",Claude draft 2026-11-09; reviewed by user 2026-11-13
+BaldursGate3,all,yes,content and discussion,Claude draft 2026-11-09; reviewed by user 2026-11-13
+BetaReaders,text,yes,submitted writing and critiques,Claude draft 2026-11-09; reviewed by user 2026-11-13
+Bible,all,yes,"title says comments, text covers any submission",Claude draft 2026-11-09; reviewed by user 2026-11-13
+bikepacking,all,yes,,Claude draft 2026-11-09; reviewed by user 2026-11-13
+cantax,text,yes,copy-pasted AI posts and comments without own input,Claude draft 2026-11-09; reviewed by user 2026-11-13
+carvana,text,yes,"long AI-written posts, inside a low-effort rule",Claude draft 2026-11-09; reviewed by user 2026-11-13
+charmed,all,yes,,Claude draft 2026-11-09; reviewed by user 2026-11-13
+chemistry,not_ban,no,"bans ""AI bad at chemistry"" posts; AI discussion allowed",Claude draft 2026-11-09; reviewed by user 2026-11-13
+CleaningTips,text,yes,AI text in posts and comments,Claude draft 2026-11-09; reviewed by user 2026-11-13
+CMT,text,yes,"AI-generated text, for misinformation",Claude draft 2026-11-09; reviewed by user 2026-11-13
+CommercialAV,all,yes,unless pre-approved; aimed at replies,Claude draft 2026-11-09; reviewed by user 2026-11-13
+cookingforbeginners,unclear,unclear,says AI is unsuitable; does not say what is removed,Claude draft 2026-11-09; reviewed by user 2026-11-13
+coparenting,all,yes,,Claude draft 2026-11-09; reviewed by user 2026-11-13
+coralisland,all,yes,"art, writing or other content",Claude draft 2026-11-09; reviewed by user 2026-11-13
+cordcutters,text,yes,"AI-generated posts, inside an astroturf rule",Claude draft 2026-11-09; reviewed by user 2026-11-13
+cryptography,text,yes,AI-generated articles or self posts,Claude draft 2026-11-09; reviewed by user 2026-11-13
+cyberpunkred,image_only,no,AI images; exception for high-effort posts,Claude draft 2026-11-09; reviewed by user 2026-11-13
+DarkRomance,text,yes,"""AI content such as ChatGPT"", inside a piracy rule",Claude draft 2026-11-09; reviewed by user 2026-11-13
+DetroitBecomeHuman,all,yes,all AI content; reason given is art,Claude draft 2026-11-09; reviewed by user 2026-11-13
+DIY,all,yes,"posts, comments, images, guides, bots",Claude draft 2026-11-09; reviewed by user 2026-11-13
+dramionebookclub,all,yes,"posts and comments, images and writing prompts",Claude draft 2026-11-09; reviewed by user 2026-11-13
+drarry,all,yes,stories and fanart,Claude draft 2026-11-09; reviewed by user 2026-11-13
+drones,all,yes,"""generative AI media"" and ""anything created by"" AI",Claude draft 2026-11-09; reviewed by user 2026-11-13
+dysautonomia,all,yes,,Claude draft 2026-11-09; reviewed by user 2026-11-13
+faeries,all,yes,,Claude draft 2026-11-09; reviewed by user 2026-11-13
+fantasywriters,all,yes,stories or artwork,Claude draft 2026-11-09; reviewed by user 2026-11-13
+flashlight,all,yes,content and bots without approval,Claude draft 2026-11-09; reviewed by user 2026-11-13
+GhostAdventures,all,yes,,Claude draft 2026-11-09; reviewed by user 2026-11-13
+goodworldbuilding,all,yes,images or content,Claude draft 2026-11-09; reviewed by user 2026-11-13
+Guildwars2,all,yes,"game content in generative AI, citing the EULA; mostly images in practice",Claude draft 2026-11-09; reviewed by user 2026-11-13
+Intune,comments_only,no,"AI comments; the description says ""we do allow"", probably a typo for do not",Claude draft 2026-11-09; reviewed by user 2026-11-13
+isfp,unclear,unclear,title bans all AI content; description is about pictures,Claude draft 2026-11-09; reviewed by user 2026-11-13
+Ithkuil,all,yes,"content, hype and speculation",Claude draft 2026-11-09; reviewed by user 2026-11-13
+javahelp,all,yes,"any AI content, including answers",Claude draft 2026-11-09; reviewed by user 2026-11-13
+kimono,all,yes,,Claude draft 2026-11-09; reviewed by user 2026-11-13
+KiriBaku,image_only,no,AI art posts,Claude draft 2026-11-09; reviewed by user 2026-11-13
+kubernetes,text,yes,obviously AI-generated articles or comments only; AI as a starting point allowed,Claude draft 2026-11-09; reviewed by user 2026-11-13
+LancerRPG,all,yes,,Claude draft 2026-11-09; reviewed by user 2026-11-13
+linkedin,not_ban,no,"bans automated engagement tools, not AI content",Claude draft 2026-11-09; reviewed by user 2026-11-13
+manufacturing,text,yes,posts and comments written by AI; grammar help allowed,Claude draft 2026-11-09; reviewed by user 2026-11-13
+merlinfic,text,yes,AI-written fics,Claude draft 2026-11-09; reviewed by user 2026-11-13
+Metaphysics,all,yes,title only,Claude draft 2026-11-09; reviewed by user 2026-11-13
+Miata,all,yes,AI pictures and text in posts; comments allowed,Claude draft 2026-11-09; reviewed by user 2026-11-13
+MortgagesCanada,comments_only,no,copy-pasted AI answers,Claude draft 2026-11-09; reviewed by user 2026-11-13
+nancydrew,image_only,no,AI images,Claude draft 2026-11-09; reviewed by user 2026-11-13
+nonduality,all,yes,AI-generated posts,Claude draft 2026-11-09; reviewed by user 2026-11-13
+OneTruthPrevails,all,yes,,Claude draft 2026-11-09; reviewed by user 2026-11-13
+osr,all,yes,,Claude draft 2026-11-09; reviewed by user 2026-11-13
+patentexaminer,all,yes,posts and comments passed off as human,Claude draft 2026-11-09; reviewed by user 2026-11-13
+POTS,all,yes,,Claude draft 2026-11-09; reviewed by user 2026-11-13
+Proxmox,all,yes,posts and comments,Claude draft 2026-11-09; reviewed by user 2026-11-13
+raspberryDIY,all,yes,,Claude draft 2026-11-09; reviewed by user 2026-11-13
+roseanne,all,yes,,Claude draft 2026-11-09; reviewed by user 2026-11-13
+sales,all,yes,posts and comments,Claude draft 2026-11-09; reviewed by user 2026-11-13
+salesforce,all,yes,posts and comments,Claude draft 2026-11-09; reviewed by user 2026-11-13
+SBCGaming,all,yes,,Claude draft 2026-11-09; reviewed by user 2026-11-13
+schizophrenia,partial,unclear,"LLM-generated content not accepted as a source, inside a misinformation rule",Claude draft 2026-11-09; reviewed by user 2026-11-13
+shadowhunters,image_only,no,AI art,Claude draft 2026-11-09; reviewed by user 2026-11-13
+Shadowrun,partial,unclear,posts focused on AI content; AI art allowed as a minor part,Claude draft 2026-11-09; reviewed by user 2026-11-13
+ShiningForce,image_only,no,AI art,Claude draft 2026-11-09; reviewed by user 2026-11-13
+SignoraMains,image_only,no,artwork rules,Claude draft 2026-11-09; reviewed by user 2026-11-13
+skinwalkerranch,all,yes,"images, video and text, except meme Fridays",Claude draft 2026-11-09; reviewed by user 2026-11-13
+socialanxiety,all,yes,title bans all AI content; description is about comments,Claude draft 2026-11-09; reviewed by user 2026-11-13
+solarenergy,text,yes,ChatGPT or AI-written posts,Claude draft 2026-11-09; reviewed by user 2026-11-13
+Superhero_Ideas,image_only,no,"title ""No AI""; description is about images",Claude draft 2026-11-09; reviewed by user 2026-11-13
+swrpg,all,yes,"text, images, video, code",Claude draft 2026-11-09; reviewed by user 2026-11-13
+tales,image_only,no,AI art,Claude draft 2026-11-09; reviewed by user 2026-11-13
+TheMagnusArchives,all,yes,exclusively AI content: art and prose,Claude draft 2026-11-09; reviewed by user 2026-11-13
+ThirdLifeSMP,all,yes,"visual, audio and text",Claude draft 2026-11-09; reviewed by user 2026-11-13
+todoist,comments_only,no,AI comments,Claude draft 2026-11-09; reviewed by user 2026-11-13
+TranslationStudies,not_ban,no,no tech support for AI translation tools,Claude draft 2026-11-09; reviewed by user 2026-11-13
+truenas,comments_only,no,AI answers to questions,Claude draft 2026-11-09; reviewed by user 2026-11-13
+TwoHotTakes,all,yes,"""no AI content of any kind"" in posts",Claude draft 2026-11-09; reviewed by user 2026-11-13
+vndevs,all,yes,assets and discussion,Claude draft 2026-11-09; reviewed by user 2026-11-13
+voynich,all,yes,"art or text, including AI-touched-up content",Claude draft 2026-11-09; reviewed by user 2026-11-13
+WoT,all,yes,images and text,Claude draft 2026-11-09; reviewed by user 2026-11-13
+writingadvice,not_ban,no,"bans discussion of AI writing tools, not AI-written posts",Claude draft 2026-11-09; reviewed by user 2026-11-13
