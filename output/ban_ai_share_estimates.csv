@@ -9,3 +9,5 @@ rule read: only bans whose rule covers text posts,0.6981,0.7603,-0.7921,2.1884,0
 rule read: drop the 4 rules that do not ban AI content,0.6023,0.6911,-0.7523,1.9569,0.3835,52,121.0,9386,,
 catch-up: adjust for pre-ban share (independent half) x post,0.4488,0.6687,-0.8619,1.7595,0.5021,55,128.0,7808,-0.3642,0.0032
 "catch-up adjusted, only bans whose rule covers text posts",0.0968,0.7463,-1.366,1.5595,0.8968,44,100.0,6237,-0.4171,0.0001
+capture regime: pre window from 2023-08-01 on,1.2963,0.8744,-0.4174,3.01,0.1382,41,95.0,7546,,
+"capture regime: pre window from 2023-08-01 on, catch-up adjusted",0.5203,0.8643,-1.1738,2.2144,0.5472,40,91.0,5726,-0.4025,0.0005

@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from analyze_ban_ai_share import ban_level, catch_up, did
+from analyze_ban_ai_share import ban_level, catch_up, did, live_capture, removals
 
 
 def panel(effect, n=400, stacks=30, seed=0):
@@ -56,3 +56,19 @@ def test_catch_up_removes_a_convergence_that_looks_like_a_ban_effect():
     assert naive["did_pp"] > 1 and naive["p"] < 0.01
     assert abs(adjusted["did_pp"]) < 0.5 * naive["did_pp"]
     assert -0.8 < adjusted["pre_share_x_post_coef"] < -0.4  # true slope -0.6
+
+
+def test_live_capture_keeps_stacks_whose_pre_window_starts_late_enough():
+    df = pd.DataFrame({"stack": ["a", "a", "b", "b"], "window": ["pre", "post", "pre", "post"],
+                       "day": ["2023-03-05", "2023-12-01", "2023-08-02", "2024-03-01"]})
+    assert set(live_capture(df)["stack"]) == {"b"}
+
+
+def test_removals_rates_and_change():
+    df = panel(0.0, n=200, stacks=20)
+    rng = np.random.default_rng(3)
+    df["removed_any"] = (rng.random(len(df)) < np.where(df["treated"] & (df["window"] == "post"), 0.2, 0.05)).astype(float)
+    rates, tests = removals(df)
+    assert set(rates["ai"]) <= {"flagged AI", "not flagged"}
+    change = tests.set_index("spec").loc["change at a ban, all posts", "did_pp"]
+    assert 12 < change < 18

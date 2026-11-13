@@ -1,0 +1,10 @@
+role,window,ai,removed,posts,removed_share,table,spec,did_pp,se_pp,ci_low_pp,ci_high_pp,p,n_bans,n_subreddits,n_posts
+control,post,not flagged,91.0,2711.0,3.3567,rates,,,,,,,,,
+control,post,flagged AI,2.0,87.0,2.2989,rates,,,,,,,,,
+control,pre,not flagged,67.0,2637.0,2.5408,rates,,,,,,,,,
+control,pre,flagged AI,4.0,65.0,6.1538,rates,,,,,,,,,
+treated,post,not flagged,55.0,2380.0,2.3109,rates,,,,,,,,,
+treated,post,flagged AI,1.0,57.0,1.7544,rates,,,,,,,,,
+treated,pre,not flagged,49.0,2305.0,2.1258,rates,,,,,,,,,
+treated,pre,flagged AI,1.0,23.0,4.3478,rates,,,,,,,,,
+,,,,,,change at a ban,"change at a ban, all posts",-0.7898,1.1801,-3.1028,1.5232,0.5033,56.0,132.0,10265.0

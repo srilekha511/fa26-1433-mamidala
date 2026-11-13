@@ -4,7 +4,8 @@ subreddits, and whether bans with more AI posting beforehand saw a larger slowdo
 Usage: python3 code/analyze_ban_ai_share.py   (after score_pangram_api.py; runs on whatever has been scored)
 Writes output/ban_ai_share_windows.csv (flagged share by group and window, and the pre-ChatGPT false-positive rate),
 output/ban_ai_share_estimates.csv (the difference-in-differences and its checks),
-output/ban_ai_share_leave_one_out.csv, output/ban_ai_share_heterogeneity.csv and output/ban_ai_share.png.
+output/ban_ai_share_leave_one_out.csv, output/ban_ai_share_heterogeneity.csv, output/ban_ai_share_removals.csv
+(how often flagged and other posts were removed, and the change at a ban) and output/ban_ai_share.png.
 
 Outcome: 1 if Pangram's short prediction is "AI" (a "Mixed" post counts as not AI; the AI fraction of the text is a
 check). Sample: the chosen posts (score_pangram_api.select) in the pre (months -6..-1) and post (+1..+6) windows.
@@ -17,6 +18,14 @@ the mean across bans of each ban's own 2x2 difference.
 
 Rule read (data/hand_coded/ban_rule_read_text.csv): checks keep only the bans whose rule covers text posts, or drop the
 rules that do not ban AI content. Only 2 bans that cover only images are scored, too few for a placebo.
+
+Capture regime: before about mid-2023 Arctic Shift archived posts weeks late, after most removals; later posts are
+captured within seconds. A check keeps the bans whose pre window starts on or after LIVE_FROM, so both windows come
+from the same regime.
+
+Removals: if moderators enforce a ban, flagged posts should be removed more often after it. A post counts as removed
+if the archive records a removal by a moderator, AutoModerator or Reddit, or a deletion, at the time it captured the
+post; removals after capture are missed, so the rates are lower bounds.
 
 Catch-up: banned subreddits start with a lower flagged share than their comparison subreddits, and low-AI communities
 may catch up as AI use spreads, whether or not they ban it. The check adds each subreddit's pre-ban flagged share x
@@ -44,6 +53,7 @@ from score_pangram_api import CHOSEN, SCORES, wilson
 OUTPUT = ROOT / "output"
 RULES = ROOT / "data" / "hand_coded" / "ban_rule_read_text.csv"
 WINDOWS = ["baseline", "pre", "post"]
+LIVE_FROM = "2023-08-01"  # first full month of near-instant capture
 MIN_CELL = 10  # posts per ban-group-window for the equal-weight version, so one post cannot swing a ban
 
 
@@ -56,6 +66,7 @@ def load():
     rules = pd.read_csv(RULES).set_index("subreddit")
     df["scope"] = df["stack"].map(rules["scope"])
     df["covers_text"] = df["stack"].map(rules["covers_text_posts"])
+    df["removed_any"] = df["removed"].notna().astype(float)
     return df, len(chosen)
 
 
@@ -147,6 +158,24 @@ def window_table(df):
     return out.sort_values(["order", "role"]).drop(columns="order")
 
 
+def live_capture(df):
+    """The stacks whose pre window starts on or after LIVE_FROM."""
+    start = df[df["window"] == "pre"].groupby("stack")["day"].min()
+    return df[df["stack"].isin(start.index[start >= LIVE_FROM])]
+
+
+def removals(df):
+    """Removal rate by group, window and whether the post is flagged, and the change in removals at a ban among all
+    posts. Too few posts are flagged (232 in the pre and post windows, most bans missing a cell) for the same
+    regression on flagged posts alone, so the flagged rates are reported as counts."""
+    d = df[df["window"].isin(["pre", "post"])]
+    rates = (d.groupby(["role", "window", "ai"])["removed_any"].agg(["sum", "size", "mean"])
+             .rename(columns={"sum": "removed", "size": "posts", "mean": "removed_share"}).reset_index())
+    rates["ai"] = rates["ai"].map({1.0: "flagged AI", 0.0: "not flagged"})
+    tests = [("change at a ban, all posts", did(d, y="removed_any"))]
+    return rates, pd.DataFrame([{"spec": name, **r} for name, r in tests if r])
+
+
 def leave_one_out(df):
     """The unweighted estimate with each subreddit dropped in turn (a ban's stack goes with its banned subreddit)."""
     rows = []
@@ -232,7 +261,9 @@ def main():
              ("rule read: only bans whose rule covers text posts", did(df[df["covers_text"] == "yes"])),
              ("rule read: drop the 4 rules that do not ban AI content", did(df[df["scope"] != "not_ban"])),
              ("catch-up: adjust for pre-ban share (independent half) x post", catch_up(df)),
-             ("catch-up adjusted, only bans whose rule covers text posts", catch_up(df[df["covers_text"] == "yes"]))]
+             ("catch-up adjusted, only bans whose rule covers text posts", catch_up(df[df["covers_text"] == "yes"])),
+             (f"capture regime: pre window from {LIVE_FROM} on", did(live_capture(df))),
+             (f"capture regime: pre window from {LIVE_FROM} on, catch-up adjusted", catch_up(live_capture(df)))]
     est = pd.DataFrame([{"spec": name, **r} for name, r in specs if r])
     est.round(4).to_csv(OUTPUT / "ban_ai_share_estimates.csv", index=False)
     print(est.round(3).to_string(index=False))
@@ -241,6 +272,13 @@ def main():
     loo.round(4).to_csv(OUTPUT / "ban_ai_share_leave_one_out.csv", index=False)
     print(f"leave one subreddit out: {loo['did_pp'].min():+.2f} to {loo['did_pp'].max():+.2f} pp "
           f"(most influential: {loo.iloc[0]['dropped']}, {loo.iloc[-1]['dropped']})")
+
+    rates, tests = removals(df)
+    rates["removed_share"] *= 100
+    pd.concat([rates.assign(table="rates"), tests.assign(table="change at a ban")]).round(4).to_csv(
+        OUTPUT / "ban_ai_share_removals.csv", index=False)
+    print(rates.round(2).to_string(index=False))
+    print(tests.round(3).to_string(index=False))
 
     het = heterogeneity(pre_ban_share(df))
     het.round(4).to_csv(OUTPUT / "ban_ai_share_heterogeneity.csv", index=False)
